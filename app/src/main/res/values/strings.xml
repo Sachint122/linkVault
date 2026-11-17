@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LinkVault</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title">Apna storage folder choose karein</string>
+    <string name="onboarding_body">LinkVault aapke links aur files ko JSON files me us folder me save karta hai jo aap khud choose karte hain. Koi account nahi, koi server nahi — sab kuch aapke device par.</string>
+    <string name="onboarding_pick">Folder choose karein</string>
+    <string name="onboarding_status_none">Abhi koi folder selected nahi hai</string>
+    <string name="onboarding_status_granted">Folder access: OK</string>
+    <string name="onboarding_status_revoked">Folder access revoked — dobara select karein</string>
+    <string name="onboarding_pick_error">Folder select nahi hua, dobara try karein</string>
+
+    <!-- Home -->
+    <string name="home_title">LinkVault</string>
+    <string name="storage_card_title">Storage status</string>
+    <string name="storage_state_no_folder">Koi folder selected nahi — pehle folder choose karein</string>
+    <string name="storage_state_granted">Folder access granted</string>
+    <string name="storage_state_revoked">Folder access revoked / missing — recovery zaroori hai</string>
+    <string name="storage_folder_label">Folder: %1$s</string>
+    <string name="storage_reselect">Folder badlein</string>
+    <string name="storage_recheck">Dobara check karein</string>
+    <string name="self_test_title">Storage self-test</string>
+    <string name="self_test_run">Self-test chalayein (CRUD)</string>
+    <string name="self_test_running">Self-test chal raha hai…</string>
+    <string name="self_test_pass">PASS: %1$s</string>
+    <string name="self_test_fail">FAIL at %1$s: %2$s</string>
+    <string name="issues_title">Data issues</string>
+    <string name="issues_scan">Issues scan karein</string>
+    <string name="issues_none">Koi issue nahi — sab records sahi hain</string>
+    <string name="issues_count">%1$s issue(s) mile — details console/report me</string>
+
+    <!-- Common -->
+    <string name="error_generic">Error: %1$s</string>
+
+    <!-- Toolbar / menu -->
+    <string name="menu_categories">Categories</string>
+    <string name="menu_settings">Settings</string>
+    <string name="categories_title">Categories</string>
+    <string name="settings_title">Settings</string>
+
+    <!-- Save / edit link -->
+    <string name="save_title">Link save karein</string>
+    <string name="edit_title">Link edit karein</string>
+    <string name="field_url">URL</string>
+    <string name="field_title">Title</string>
+    <string name="field_description">Note (optional)</string>
+    <string name="field_category">Category</string>
+    <string name="field_tags">Tags</string>
+    <string name="tag_add">Add</string>
+    <string name="tag_hint">Tag type karein</string>
+    <string name="switch_pinned">Pin (list me sabse upar)</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_save_anyway">Save anyway</string>
+    <string name="save_invalid_url">URL valid nahi hai (http/https hi chalega)</string>
+    <string name="save_success">Link save ho gaya</string>
+    <string name="save_updated">Link update ho gaya</string>
+    <string name="save_error">Save fail: %1$s</string>
+    <string name="duplicate_warning">Pehle se saved hai: %1$s — dobara Save dabayein to bhi save kar denge.</string>
+    <string name="no_url_hint">Shared text me koi link nahi mila — URL khud paste karein</string>
+    <string name="extra_urls_hint">Is share me aur bhi URLs the (first dikhaya ja raha hai):\n%1$s</string>
+    <string name="source_label">Source: %1$s</string>
+    <string name="edit_record_not_found">Record nahi mila</string>
+
+    <!-- Link list -->
+    <string name="cat_all">Sab</string>
+    <string name="list_empty">Abhi koi link nahi — + button se pehla link add karein</string>
+    <string name="list_empty_filtered">Is category me abhi koi link nahi</string>
+    <string name="fab_add_link">Link add karein</string>
+    <string name="action_open">Open</string>
+    <string name="action_share">Share link</string>
+    <string name="share_title_chooser">Share via</string>
+    <string name="action_copy">URL copy karein</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_move">Move to category…</string>
+    <string name="action_pin">Pin</string>
+    <string name="action_unpin">Unpin</string>
+    <string name="action_delete">Delete</string>
+    <string name="copied_toast">URL clipboard me copy ho gaya</string>
+    <string name="delete_title">Link delete karein?</string>
+    <string name="delete_message">\"%1$s\" delete ho jayega.</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="deleted_toast">Link delete ho gaya</string>
+    <string name="undo">Undo</string>
+    <string name="undone_toast">Wapas save ho gaya</string>
+    <string name="move_done">Move ho gaya</string>
+    <string name="open_failed">URL open nahi ho paya</string>
+    <string name="menu_more">More actions</string>
+
+    <!-- Categories screen -->
+    <string name="categories_empty">Koi category nahi — + se banayein</string>
+    <string name="category_new_title">Nayi category</string>
+    <string name="category_rename_title">Category rename karein</string>
+    <string name="category_name_hint">Category naam (1-60 characters)</string>
+    <string name="category_created">Category ban gayi</string>
+    <string name="category_renamed">Category rename ho gayi</string>
+    <string name="category_deleted">Category delete ho gayi</string>
+    <string name="category_error">%1$s</string>
+    <string name="category_delete_title">%1$s delete karein?</string>
+    <string name="category_delete_nonempty">%1$s me %2$d link(s) hain. Delete karne par sab Uncategorized me move ho jayenge.</string>
+    <string name="category_delete_empty">Is category me koi link nahi hai.</string>
+    <string name="btn_move_and_delete">Move + Delete</string>
+    <string name="category_count">%1$d link(s)</string>
+    <string name="action_rename">Rename</string>
+</resources>

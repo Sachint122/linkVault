@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.linkvault.app.ui.home.HomeFragment"
+        android:label="@string/home_title" />
+
+    <fragment
+        android:id="@+id/onboardingFragment"
+        android:name="com.linkvault.app.ui.onboarding.OnboardingFragment"
+        android:label="@string/onboarding_title" />
+
+    <fragment
+        android:id="@+id/saveLinkFragment"
+        android:name="com.linkvault.app.ui.save.SaveLinkFragment"
+        android:label="@string/save_title" />
+
+    <fragment
+        android:id="@+id/categoriesFragment"
+        android:name="com.linkvault.app.ui.categories.CategoriesFragment"
+        android:label="@string/categories_title" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.linkvault.app.ui.settings.SettingsFragment"
+        android:label="@string/settings_title" />
+
+</navigation>

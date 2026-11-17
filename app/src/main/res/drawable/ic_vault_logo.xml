@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Outer Cyber Hex Shield -->
+    <path
+        android:fillColor="#151E32"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="1.5"
+        android:strokeLineJoin="round"
+        android:pathData="M24,4 L40,11 L40,26 C40,35 24,44 24,44 C24,44 8,35 8,26 L8,11 Z" />
+
+    <!-- Circuit Accent Lines -->
+    <path
+        android:strokeColor="#A855F7"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M16,18 L24,14 L32,18" />
+    <path
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M15,28 L24,34 L33,28" />
+
+    <!-- Central Vault Nexus / Core -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M24,20 C21.8,20 20,21.8 20,24 C20,25.5 20.8,26.8 22,27.5 L22,30 L26,30 L26,27.5 C27.2,26.8 28,25.5 28,24 C28,21.8 26.2,20 24,20 Z" />
+</vector>

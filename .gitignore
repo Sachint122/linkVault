@@ -1,0 +1,27 @@
+# Built artifacts
+/build/
+/app/build/
+/captures/
+/.cxx/
+/.externalNativeBuild/
+
+# Gradle
+.gradle/
+gradle-app.setting
+
+# Local config (machine-specific)
+local.properties
+
+# IDE
+/.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug/prod signing keys — never commit
+*.jks
+*.keystore
