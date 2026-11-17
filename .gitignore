@@ -25,3 +25,4 @@ Thumbs.db
 # Debug/prod signing keys — never commit
 *.jks
 *.keystore
+lv_ui.xml
