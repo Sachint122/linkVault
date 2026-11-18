@@ -126,6 +126,65 @@ Promote PROPOSED → APPROVED only on explicit product-owner confirmation.
 - **Why:** Paging3 adds complexity; an index-backed windowed loader is
   enough for thousands of records and stays dependency-light.
 
+## D-17 — On-device AI runtime (offline link analysis)
+
+- **Status:** PROPOSED (2026-11-18)
+- **Decision:** LiteRT-LM `0.19.1` (Maven, Kotlin API, CPU backend) as the
+  optional LLM runtime; one Kotlin interop file (`LocalAiEngine.kt`), app
+  core stays Java + XML (D-01 intact). Model = user-pushed **`.litertlm`**
+  in app-internal `filesDir/ai_model.litertlm` (never GGUF — LiteRT-LM does
+  not accept it; never in the SAF vault folder). Recommended model:
+  `litert-community/Qwen3-0.6B`. Pipeline is rule-based first with graceful
+  rule-only fallback when no model is present; single sequential WorkManager
+  job, persistent queue, protection rules (fill-if-null summary, ungrouped-
+  only category, additive tags, no `updatedAt` bump).
+- **Why:** spec names LiteRT-LM as preferred runtime and permits Kotlin
+  interop for it; official artifact avoids NDK/CMake native builds; official
+  0.6 B model fits the 0.5–1.5 B band; CPU-only keeps battery/manifest simple.
+  llama.cpp JNI was the alternative (GGUF direct) but needs a native toolchain
+  build + JNI wrapper with no functional gain for this use case.
+
+## D-18 — Share-to-save skips the review screen (owner directive)
+
+- **Status:** APPROVED (2026-11-18)
+- **Decision:** ACTION_SEND **URL** shares persist immediately — no review
+  dialog (supersedes FR-01's mandatory review for this entry point). Save
+  path: AutoCat rule → `cat_ungrouped`, then enqueue the AI pipeline which
+  fills folder (create-if-missing), 2-line summary, and tags automatically.
+  Toast confirms ("Link saved — AI …"). File shares, manual in-app add,
+  clipboard offer, and edit mode keep the review screen unchanged.
+- **Why:** owner: "share karne per dialog open na ho, direct save ho jaye …
+  AI khud folder/summary/tag kar de, user ko kuch karna na pade."
+- **Also:** list rows show the AI summary under every link (max 2 lines);
+  Settings gains an "On-Device AI" status card (model present, queue
+  pending/failed, worker active).
+
+## D-19 — Auto-clean pass (AI maintains the vault, never deletes links)
+
+- **Status:** APPROVED (2026-11-18)
+- **Decision:** a daily WorkManager job (`auto_clean_periodic`, App.onCreate
+  schedule) runs `AutoCleanWorker` + pure `AutoCleanPlanner`:
+  1. **Folders:** removes non-system categories that hold **zero links and
+     zero files**, have no child category, are **not targeted by an
+     Auto-Categorize rule**, and have been untouched for **≥30 days**
+     (grace on `max(createdAt, updatedAt)`). Also sweeps **empty orphan
+     `user/categories/*` directories** left by earlier manual deletes
+     (non-empty dirs are never touched).
+  2. **Tags:** prunes redundant tags *on link records* — tag equal to the
+     record's folder name, singular/plural pairs on the same record
+     ("video"/"videos"; conservative: only words >4 chars ending in "s"),
+     blank entries. Written via `RecordRepository.saveTags()` (no
+     `updatedAt` bump — housekeeping must not re-sort the browse list).
+  3. **Hard invariant: link and file records are never deleted or
+     rewritten** (the planner cannot even express record deletion).
+  Side effects on change: index invalidate + `AiUpdateNotifier.fire(null)`.
+  Stats land in `lv_prefs` (`auto_clean_last_run` / `_last_stats`) and
+  render in the Settings AI card ("Auto-clean: X folder(s), Y tag(s)").
+- **Why:** owner: "AI khud app clean kare — unused tags/folder agar bahut
+  time se use nahi hua ho, **link delete na kare**." Deterministic rules
+  (not LLM) because the decisions are structural, cheap, and must be
+  provably safe; LLM stays in the enrichment path only (D-17).
+
 ## Spec §13 open-decision coverage
 
 | Spec decision | ADR | Status |

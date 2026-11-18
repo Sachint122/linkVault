@@ -67,6 +67,29 @@ public class SettingsViewModel extends AndroidViewModel {
         }
     }
 
+    /** On-device AI status for the Settings card (D-17). */
+    public static final class AiStatus {
+        public final boolean modelReady;
+        public final long modelBytes;
+        public final int pending;
+        public final int failed;
+        public final boolean workerActive;
+        public final long lastCleanRun;
+        @Nullable public final String lastCleanStats;
+
+        AiStatus(boolean modelReady, long modelBytes, int pending,
+                 int failed, boolean workerActive, long lastCleanRun,
+                 @Nullable String lastCleanStats) {
+            this.modelReady = modelReady;
+            this.modelBytes = modelBytes;
+            this.pending = pending;
+            this.failed = failed;
+            this.workerActive = workerActive;
+            this.lastCleanRun = lastCleanRun;
+            this.lastCleanStats = lastCleanStats;
+        }
+    }
+
     private final App app;
     private final StoragePermissionManager pm;
     private final ExecutorService io = Executors.newSingleThreadExecutor();
@@ -84,6 +107,7 @@ public class SettingsViewModel extends AndroidViewModel {
     private final MutableLiveData<String> autoBackupStatus = new MutableLiveData<>();
     private final MutableLiveData<RestoreEngine.RestorePreview> restorePreview = new MutableLiveData<>();
     private final MutableLiveData<RestoreEngine.RestoreResult> restoreResult = new MutableLiveData<>();
+    private final MutableLiveData<AiStatus> aiStatus = new MutableLiveData<>();
 
     public SettingsViewModel(@NonNull Application application) {
         super(application);
@@ -94,6 +118,31 @@ public class SettingsViewModel extends AndroidViewModel {
         autoBackupEnabled.postValue(prefs().getBoolean(
                 com.linkvault.app.backup.AutoBackupWorker.KEY_ENABLED, false));
         refreshAutoBackupStatus();
+        refreshAiStatus();
+    }
+
+    public LiveData<AiStatus> getAiStatus() { return aiStatus; }
+
+    /** Non-blocking snapshot: model presence + queue counts + worker state. */
+    public void refreshAiStatus() {
+        io.execute(() -> {
+            try {
+                var c = app.getContainer();
+                boolean ready = c.localAiManager().isModelReady();
+                long bytes = ready
+                        ? new java.io.File(app.getFilesDir(),
+                                com.linkvault.app.ai.AiContract.MODEL_FILE_NAME).length()
+                        : 0;
+                int[] stats = c.aiQueueManager().stats();
+                android.content.SharedPreferences p = prefs();
+                aiStatus.postValue(new AiStatus(ready, bytes, stats[0], stats[1],
+                        c.aiQueueManager().isWorkerActive(),
+                        p.getLong(com.linkvault.app.ai.AutoCleanWorker.KEY_LAST_RUN, 0),
+                        p.getString(com.linkvault.app.ai.AutoCleanWorker.KEY_LAST_STATS, null)));
+            } catch (Exception ignored) {
+                // Settings must never crash over a status read.
+            }
+        });
     }
 
     // ----------------------------------------------------------- Auto backup

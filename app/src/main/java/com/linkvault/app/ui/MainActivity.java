@@ -2,6 +2,7 @@ package com.linkvault.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
@@ -157,10 +158,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Parses an ACTION_SEND payload and routes to the review screen.
-     * Nothing is persisted automatically - the review screen is mandatory
-     * (FR-01). If no folder is selected yet, the payload is parked until
-     * onboarding completes (process-death caveat: static holder, documented).
+     * Parses an ACTION_SEND payload. URL shares save directly (D-18) — the
+     * background AI pipeline fills folder/summary/tags; file shares still go
+     * through the review screen. If no folder is selected yet, the payload is
+     * parked until onboarding completes (process-death caveat: static holder,
+     * documented).
      */
     private void handleShareIntent(@Nullable Intent intent) {
         if (intent == null) return;
@@ -228,7 +230,57 @@ public class MainActivity extends AppCompatActivity {
             pendingShare = args;
             return;
         }
-        navigateToSave(args);
+        // D-18: URL shares save directly (no review dialog) — AI does the rest
+        // (folder, summary, tags). File shares keep the review screen.
+        if (args.getBoolean(SaveLinkFragment.ARG_IS_FILE, false)) {
+            navigateToSave(args);
+        } else {
+            directSaveUrl(args);
+        }
+    }
+
+    /**
+     * D-18 direct save: persist a shared URL immediately (AutoCat rule →
+     * ungrouped), enqueue AI analysis, toast the user. Runs off the UI thread.
+     */
+    private void directSaveUrl(Bundle args) {
+        final String url = args.getString(SaveLinkFragment.ARG_URL);
+        final String title = args.getString(SaveLinkFragment.ARG_TITLE);
+        final String sourcePkg = args.getString(SaveLinkFragment.ARG_SOURCE_PKG);
+        if (url == null || !com.linkvault.app.domain.policy.UrlPolicy.isValid(url)) {
+            Toast.makeText(this, "URL save nahi hua (invalid link)", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        new Thread(() -> {
+            try {
+                var c = container();
+                String finalUrl = url.trim();
+                String finalTitle = (title == null || title.trim().isEmpty())
+                        ? com.linkvault.app.domain.model.LinkRecord.fallbackTitle(finalUrl)
+                        : title.trim();
+                String cat = com.linkvault.app.domain.model.Category.UNGROUPED_ID;
+                String ruled = c.autoCatRepository().matchFor(finalUrl);
+                if (ruled != null) cat = ruled;
+                com.linkvault.app.domain.model.LinkRecord rec =
+                        com.linkvault.app.domain.model.LinkRecord.create(
+                                java.util.UUID.randomUUID().toString(),
+                                finalTitle, finalUrl, null, cat,
+                                null, sourcePkg, null,
+                                java.util.List.of(), false,
+                                java.time.Instant.now().toString());
+                c.recordRepository().create(rec);
+                c.aiQueueManager().enqueue(rec.getId());
+                c.indexRepository().invalidate();
+                com.linkvault.app.widget.LinkVaultWidgetProvider.updateAll(this);
+                runOnUiThread(() -> Toast.makeText(this,
+                        "Link saved — AI folder, summary aur tags bana raha hai",
+                        Toast.LENGTH_SHORT).show());
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(this,
+                        "Save failed: " + (e.getMessage() == null ? "error" : e.getMessage()),
+                        Toast.LENGTH_SHORT).show());
+            }
+        }, "direct-share-save").start();
     }
 
     @Nullable
@@ -287,7 +339,11 @@ public class MainActivity extends AppCompatActivity {
         if (pendingShare != null) {
             Bundle b = pendingShare;
             pendingShare = null;
-            navigateToSave(b);
+            if (b.getBoolean(SaveLinkFragment.ARG_IS_FILE, false)) {
+                navigateToSave(b);
+            } else {
+                directSaveUrl(b);
+            }
         }
     }
 

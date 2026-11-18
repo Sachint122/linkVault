@@ -172,6 +172,9 @@ public class SaveLinkViewModel extends AndroidViewModel {
                             sourceAppName, sourcePackage, null,
                             tags, pinned, Instant.now().toString());
                     repo.create(rec);
+                    // Queue background AI analysis (dedupe + rule-only
+                    // fallback handled in the worker; never blocks save).
+                    app.getContainer().aiQueueManager().enqueue(rec.getId());
                 }
                 app.getContainer().indexRepository().invalidate();
                 com.linkvault.app.widget.LinkVaultWidgetProvider.updateAll(app);

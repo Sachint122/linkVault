@@ -87,6 +87,16 @@ public class RecordRepository {
     public synchronized LinkRecord update(LinkRecord record) throws StorageException {
         LinkRecord existing = findById(record.getId());
         String now = nowIso();
+        // AI metadata: incoming wins only when actually set, so user edits
+        // (13/15-arg builders) and partial restores never wipe an analysis.
+        String aiSummary = record.getSummary() != null ? record.getSummary() : existing.getSummary();
+        String aiStatus = record.getAiStatus() != null ? record.getAiStatus() : existing.getAiStatus();
+        double aiConf = record.getAiConfidence() >= 0
+                ? record.getAiConfidence() : existing.getAiConfidence();
+        String aiSource = record.getAiSource() != null ? record.getAiSource() : existing.getAiSource();
+        String aiAnalyzedAt = record.getAiAnalyzedAt() != null
+                ? record.getAiAnalyzedAt() : existing.getAiAnalyzedAt();
+        int aiVersion = record.getAiVersion() > 0 ? record.getAiVersion() : existing.getAiVersion();
         LinkRecord updated = new LinkRecord(
                 existing.getSchemaVersion(),
                 existing.getId(),
@@ -102,7 +112,13 @@ public class RecordRepository {
                 existing.getCreatedAt(),
                 now,
                 existing.getCheckedAt(),
-                existing.getHttpStatus());
+                existing.getHttpStatus(),
+                aiSummary,
+                aiStatus,
+                aiConf,
+                aiSource,
+                aiAnalyzedAt,
+                aiVersion);
         // Same category → overwrite in place; different category → write new + delete old.
         String oldFolder = categories.folderFor(existing.getCategoryId());
         String newFolder = categories.folderFor(updated.getCategoryId());
@@ -122,6 +138,37 @@ public class RecordRepository {
         LinkRecord checked = existing.withCheck(nowIso(), httpStatus);
         writeInto(categories.folderFor(existing.getCategoryId()), checked);
         return checked;
+    }
+
+    /**
+     * Persists an on-device AI analysis. Does NOT bump updatedAt (not a user
+     * content edit). Handles a category change when the analysis resolved an
+     * ungrouped record into a folder (write new + delete old).
+     */
+    public synchronized LinkRecord saveAi(LinkRecord analyzed) throws StorageException {
+        LinkRecord existing = findById(analyzed.getId());
+        String oldFolder = categories.folderFor(existing.getCategoryId());
+        String newFolder = categories.folderFor(analyzed.getCategoryId());
+        if (oldFolder.equals(newFolder)) {
+            writeInto(newFolder, analyzed);
+        } else {
+            writeInto(newFolder, analyzed);
+            deleteFile(oldFolder, fileNameFor(analyzed.getId()));
+        }
+        return analyzed;
+    }
+
+    /**
+     * Persists an auto-clean tag prune (D-19). Does NOT bump updatedAt —
+     * housekeeping is not a user content edit, and bumping would re-sort the
+     * browse list for a cosmetic change.
+     */
+    public synchronized LinkRecord saveTags(String recordId, List<String> tags)
+            throws StorageException {
+        LinkRecord existing = findById(recordId);
+        LinkRecord updated = existing.withTags(tags);
+        writeInto(categories.folderFor(existing.getCategoryId()), updated);
+        return updated;
     }
 
     public synchronized LinkRecord moveTo(String recordId, String newCategoryId)

@@ -72,6 +72,23 @@
             app:layout_constraintStart_toEndOf="@id/iconContainer"
             app:layout_constraintTop_toBottomOf="@id/itemTitle" />
 
+        <!-- AI summary (2 lines, filled by on-device AI) -->
+        <TextView
+            android:id="@+id/itemSummary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="6dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="@color/cyber_text_secondary"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@id/pinIcon"
+            app:layout_constraintStart_toEndOf="@id/iconContainer"
+            app:layout_constraintTop_toBottomOf="@id/itemUrl" />
+
         <!-- Metadata pill row -->
         <TextView
             android:id="@+id/itemMeta"
@@ -86,7 +103,7 @@
             android:textColor="@color/cyber_text_secondary"
             app:layout_constraintEnd_toStartOf="@id/moreButton"
             app:layout_constraintStart_toEndOf="@id/iconContainer"
-            app:layout_constraintTop_toBottomOf="@id/itemUrl" />
+            app:layout_constraintTop_toBottomOf="@id/itemSummary" />
 
         <!-- Pin Icon -->
         <ImageView

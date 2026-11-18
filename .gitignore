@@ -27,3 +27,6 @@ Thumbs.db
 *.keystore
 lv_ui.xml
 keystore.properties
+
+# Kotlin build cache
+.kotlin/

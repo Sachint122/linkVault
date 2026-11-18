@@ -23,6 +23,8 @@ public final class LinkCodec {
     private static final int MAX_DESCRIPTION = 10_000;
     private static final int MAX_TAGS = 20;
     private static final int MAX_TAG_LENGTH = 30;
+    /** Read-side sanity cap for AI summaries (write side enforces 200). */
+    private static final int MAX_AI_SUMMARY_READ = 1000;
 
     public String toJson(LinkRecord r) {
         try {
@@ -49,6 +51,17 @@ public final class LinkCodec {
             if (r.getCheckedAt() != null) {
                 o.put("checkedAt", r.getCheckedAt());
                 o.put("httpStatus", r.getHttpStatus());
+            }
+            // Additive on-device AI fields — omitted when never queued/analyzed.
+            if (r.getSummary() != null) {
+                o.put("summary", r.getSummary());
+            }
+            if (r.getAiStatus() != null) {
+                o.put("aiStatus", r.getAiStatus());
+                o.put("aiConfidence", r.getAiConfidence());
+                o.put("aiSource", r.getAiSource() == null ? JSONObject.NULL : r.getAiSource());
+                o.put("aiAnalyzedAt", r.getAiAnalyzedAt() == null ? JSONObject.NULL : r.getAiAnalyzedAt());
+                o.put("aiVersion", r.getAiVersion());
             }
             return o.toString(2);
         } catch (JSONException e) {
@@ -129,9 +142,23 @@ public final class LinkCodec {
         }
         int httpStatus = o.optInt("httpStatus", 0);
 
+        // Additive on-device AI fields — lenient by design: a bad value is
+        // dropped, never makes the whole record unreadable (user data first).
+        String summary = optNullableString(o, "summary");
+        if (summary != null && summary.length() > MAX_AI_SUMMARY_READ) summary = null;
+        String aiStatus = optNullableString(o, "aiStatus");
+        double aiConfidence = o.optDouble("aiConfidence", LinkRecord.AI_CONFIDENCE_UNSET);
+        if (Double.isNaN(aiConfidence) || aiConfidence < -1 || aiConfidence > 1) {
+            aiConfidence = LinkRecord.AI_CONFIDENCE_UNSET;
+        }
+        String aiSource = optNullableString(o, "aiSource");
+        String aiAnalyzedAt = optNullableString(o, "aiAnalyzedAt");
+        int aiVersion = o.optInt("aiVersion", 0);
+
         return new LinkRecord(schemaVersion, id, title, url, description, categoryId,
                 sourceAppName, sourcePackageName, imageUrl, tags, pinned, createdAt, updatedAt,
-                checkedAt, httpStatus);
+                checkedAt, httpStatus, summary, aiStatus, aiConfidence, aiSource,
+                aiAnalyzedAt, aiVersion);
     }
 
     private static List<String> parseTags(JSONObject o, String relativePath)

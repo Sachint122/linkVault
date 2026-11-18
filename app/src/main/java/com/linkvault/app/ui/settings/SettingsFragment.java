@@ -36,6 +36,10 @@ public class SettingsFragment extends Fragment {
 
     private TextView storageState;
     private TextView storageFolder;
+    private TextView aiStatusText;
+    private TextView aiModelText;
+    private TextView aiQueueText;
+    private TextView aiCleanText;
     private TextView selfTestResult;
     private TextView issuesResult;
     private TextView backupStatusText;
@@ -109,9 +113,20 @@ public class SettingsFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        // Re-snapshot AI status whenever Settings becomes visible.
+        if (viewModel != null) viewModel.refreshAiStatus();
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         storageState = view.findViewById(R.id.storageState);
         storageFolder = view.findViewById(R.id.storageFolder);
+        aiStatusText = view.findViewById(R.id.aiStatusText);
+        aiModelText = view.findViewById(R.id.aiModelText);
+        aiQueueText = view.findViewById(R.id.aiQueueText);
+        aiCleanText = view.findViewById(R.id.aiCleanText);
         selfTestResult = view.findViewById(R.id.selfTestResult);
         issuesResult = view.findViewById(R.id.issuesResult);
         backupStatusText = view.findViewById(R.id.backupStatusText);
@@ -159,6 +174,7 @@ public class SettingsFragment extends Fragment {
         viewModel.getState().observe(getViewLifecycleOwner(), this::renderState);
         viewModel.getSelfTest().observe(getViewLifecycleOwner(), this::renderSelfTest);
         viewModel.getIssuesReport().observe(getViewLifecycleOwner(), this::renderIssues);
+        viewModel.getAiStatus().observe(getViewLifecycleOwner(), this::renderAiStatus);
 
         viewModel.getBackupStatus().observe(getViewLifecycleOwner(), status -> {
             if (status != null) {
@@ -308,6 +324,34 @@ public class SettingsFragment extends Fragment {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private void renderAiStatus(SettingsViewModel.AiStatus s) {
+        if (s == null) return;
+        if (s.workerActive) {
+            aiStatusText.setText("Status: Active — AI links analyze kar raha hai…");
+            aiStatusText.setTextColor(getResources().getColor(R.color.cyber_cyan, null));
+        } else if (s.modelReady) {
+            aiStatusText.setText("Status: Active — on-device AI ready");
+            aiStatusText.setTextColor(getResources().getColor(R.color.lv_success, null));
+        } else {
+            aiStatusText.setText("Status: Active — rules-only mode (model not installed)");
+            aiStatusText.setTextColor(getResources().getColor(R.color.cyber_text_secondary, null));
+        }
+        aiModelText.setText(s.modelReady
+                ? "Model: Qwen3-0.6B installed (" + (s.modelBytes / (1024 * 1024)) + " MB)"
+                : "Model: not installed — sirf rule-based folder/tags chalu hai");
+        aiQueueText.setText("Queue: " + s.pending + " pending  ·  " + s.failed + " failed");
+        if (s.lastCleanRun == 0) {
+            aiCleanText.setText("Auto-clean: abhi tak nahi chala (daily, 30 din purane empty folders + redundant tags).");
+        } else {
+            String when = java.time.Instant.ofEpochMilli(s.lastCleanRun)
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm"));
+            aiCleanText.setText("Auto-clean (" + when + "): "
+                    + (s.lastCleanStats == null ? "kuch nahi badla" : s.lastCleanStats)
+                    + " — links kabhi delete nahi hote.");
+        }
     }
 
     private void renderState(SettingsViewModel.UiState s) {

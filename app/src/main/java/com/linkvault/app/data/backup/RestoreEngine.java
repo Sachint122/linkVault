@@ -3,6 +3,7 @@ package com.linkvault.app.data.backup;
 import android.content.ContentResolver;
 import android.net.Uri;
 
+import com.linkvault.app.ai.AIQueueManager;
 import com.linkvault.app.data.json.CategoryCodec;
 import com.linkvault.app.data.json.FileCodec;
 import com.linkvault.app.data.json.LinkCodec;
@@ -96,6 +97,7 @@ public class RestoreEngine {
     private final LinkCodec linkCodec;
     private final FileCodec fileCodec;
     private final ContentResolver contentResolver;
+    private final AIQueueManager aiQueue;
 
     public RestoreEngine(
             DocumentTreeClient tree,
@@ -107,7 +109,8 @@ public class RestoreEngine {
             CategoryCodec categoryCodec,
             LinkCodec linkCodec,
             FileCodec fileCodec,
-            ContentResolver contentResolver) {
+            ContentResolver contentResolver,
+            AIQueueManager aiQueue) {
         this.tree = tree;
         this.engine = engine;
         this.categoryRepo = categoryRepo;
@@ -118,6 +121,7 @@ public class RestoreEngine {
         this.linkCodec = linkCodec;
         this.fileCodec = fileCodec;
         this.contentResolver = contentResolver;
+        this.aiQueue = aiQueue;
     }
 
     /**
@@ -259,15 +263,21 @@ public class RestoreEngine {
                         LinkRecord fresh = LinkRecord.create(newId, link.getTitle(), link.getUrl(),
                                 link.getDescription(), link.getCategoryId(), link.getSourceAppName(),
                                 link.getSourcePackageName(), link.getImageUrl(), link.getTags(),
-                                link.isPinned(), Instant.now().toString());
+                                link.isPinned(), Instant.now().toString())
+                                .withAiFrom(link); // carry the backup's analysis, if any
                         recordRepo.create(fresh);
+                        aiQueue.enqueue(fresh.getId()); // analyzed later if it has none
                         restoredLinks++;
                     } else if (policy == ConflictPolicy.REPLACE) {
-                        recordRepo.update(link);
+                        LinkRecord updated = recordRepo.update(link);
+                        if (!LinkRecord.AI_STATUS_DONE.equals(updated.getAiStatus())) {
+                            aiQueue.enqueue(updated.getId());
+                        }
                         restoredLinks++;
                     }
                 } else {
                     recordRepo.create(link);
+                    aiQueue.enqueue(link.getId());
                     restoredLinks++;
                 }
             } catch (Exception e) {

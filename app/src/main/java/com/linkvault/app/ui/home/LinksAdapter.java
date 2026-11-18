@@ -106,12 +106,17 @@ public class LinksAdapter extends RecyclerView.Adapter<LinksAdapter.Holder> {
                         && a.getLink().getCheckedAt() != null;
                 boolean bChecked = b.isLink() && b.getLink() != null
                         && b.getLink().getCheckedAt() != null;
+                String aSummary = a.isLink() && a.getLink() != null
+                        ? a.getLink().getSummary() : null;
+                String bSummary = b.isLink() && b.getLink() != null
+                        ? b.getLink().getSummary() : null;
                 return Objects.equals(a.getTitle(), b.getTitle())
                         && Objects.equals(a.getSubtitle(), b.getSubtitle())
                         && Objects.equals(a.getCategoryId(), b.getCategoryId())
                         && a.isPinned() == b.isPinned()
                         && Objects.equals(a.getTags(), b.getTags())
                         && Objects.equals(a.getUpdatedAt(), b.getUpdatedAt())
+                        && Objects.equals(aSummary, bSummary)
                         && aChecked == bChecked
                         && (!aChecked || a.getLink().getHttpStatus() == b.getLink().getHttpStatus())
                         && Objects.equals(
@@ -142,6 +147,16 @@ public class LinksAdapter extends RecyclerView.Adapter<LinksAdapter.Holder> {
         boolean selected = selectedIds.contains(item.getId());
         h.title.setText(item.getTitle());
         h.url.setText(item.getSubtitle());
+
+        // AI summary (2 lines) — only when the pipeline has produced one.
+        String summary = item.isLink() && item.getLink() != null
+                ? item.getLink().getSummary() : null;
+        if (summary != null && !summary.isEmpty()) {
+            h.summary.setText(summary);
+            h.summary.setVisibility(View.VISIBLE);
+        } else {
+            h.summary.setVisibility(View.GONE);
+        }
 
         // Type icon
         if (item.isLink()) {
@@ -214,6 +229,7 @@ public class LinksAdapter extends RecyclerView.Adapter<LinksAdapter.Holder> {
         final ImageView typeIcon;
         final TextView title;
         final TextView url;
+        final TextView summary;
         final TextView meta;
         final ImageView pinIcon;
         final View moreButton;
@@ -223,6 +239,7 @@ public class LinksAdapter extends RecyclerView.Adapter<LinksAdapter.Holder> {
             typeIcon = itemView.findViewById(R.id.typeIcon);
             title = itemView.findViewById(R.id.itemTitle);
             url = itemView.findViewById(R.id.itemUrl);
+            summary = itemView.findViewById(R.id.itemSummary);
             meta = itemView.findViewById(R.id.itemMeta);
             pinIcon = itemView.findViewById(R.id.pinIcon);
             moreButton = itemView.findViewById(R.id.moreButton);

@@ -2,6 +2,7 @@ package com.linkvault.app.ui.home;
 
 import android.app.Application;
 import android.net.Uri;
+import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,6 +12,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.linkvault.app.App;
 import com.linkvault.app.R;
+import com.linkvault.app.ai.AiUpdateNotifier;
 import com.linkvault.app.data.repo.IndexRepository;
 import com.linkvault.app.data.saf.StorageException;
 import com.linkvault.app.data.saf.StoragePermissionManager;
@@ -78,9 +80,22 @@ public class HomeViewModel extends AndroidViewModel {
         this.app = (App) application;
         selectedCategoryId.postValue(null);
         selectedTypeFilter.postValue(null);
+        // AI worker writes records in the background — refresh the list when
+        // an analysis lands (throttled: worker items arrive seconds apart).
+        AiUpdateNotifier.add(aiUpdateListener);
         // First load happens in HomeFragment.onResume() — avoids doing the
         // disk scan twice on open (constructor + onResume).
     }
+
+    private final java.util.concurrent.atomic.AtomicLong lastAiRefresh =
+            new java.util.concurrent.atomic.AtomicLong();
+    private final AiUpdateNotifier.Listener aiUpdateListener = recordId -> {
+        long now = SystemClock.elapsedRealtime();
+        long last = lastAiRefresh.get();
+        if (now - last < 500) return;
+        if (!lastAiRefresh.compareAndSet(last, now)) return;
+        refresh();
+    };
 
     public LiveData<List<VaultItem>> getVisibleItems() { return visibleItems; }
     public LiveData<List<Category>> getCategories() { return categories; }
@@ -425,6 +440,7 @@ public class HomeViewModel extends AndroidViewModel {
 
     @Override
     protected void onCleared() {
+        AiUpdateNotifier.remove(aiUpdateListener);
         io.shutdown();
         super.onCleared();
     }

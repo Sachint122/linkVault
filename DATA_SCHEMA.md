@@ -57,7 +57,13 @@ are *relative* and validated for containment on every operation.
   "tags": ["android", "reference"],
   "pinned": false,
   "createdAt": "2026-11-16T10:00:00Z",
-  "updatedAt": "2026-11-16T10:00:00Z"
+  "updatedAt": "2026-11-16T10:00:00Z",
+  "summary": "A quick Android reference page",
+  "aiStatus": "done",
+  "aiConfidence": 0.87,
+  "aiSource": "local_ai",
+  "aiAnalyzedAt": "2026-11-18T07:10:00Z",
+  "aiVersion": 1
 }
 ```
 
@@ -75,6 +81,18 @@ are *relative* and validated for containment on every operation.
 | `tags` | string[] | MVP (D-09): 0–20 tags, each 1–30 chars, trimmed, deduped case-insensitive |
 | `pinned` | boolean | MVP (D-09): default false; pinned items sort first |
 | `createdAt`/`updatedAt` | string | ISO-8601 UTC |
+| `checkedAt` | string? | ISO-8601 UTC of last manual dead-link check; omitted when never checked |
+| `httpStatus` | int | 0 = unset, -1 = unreachable, else HTTP code; written with `checkedAt` |
+| `summary` | string? | **Additive (AI):** auto-generated one-line summary ≤ 200 chars; omitted when none; once set it is never overwritten by the pipeline |
+| `aiStatus` | string? | **Additive (AI):** `pending` / `done` / `failed`; omitted when never queued |
+| `aiConfidence` | number | **Additive (AI):** 0–1, -1 = unset; written with `aiStatus` |
+| `aiSource` | string? | **Additive (AI):** `rule` (offline rules) or `local_ai` (on-device LLM) |
+| `aiAnalyzedAt` | string? | **Additive (AI):** ISO-8601 UTC of last analysis |
+| `aiVersion` | int | **Additive (AI):** analyzer contract version (0 = none, current = 1) |
+
+AI fields are additive and read-side lenient: a bad value is dropped, never
+makes the record unreadable. AI writes do **not** bump `updatedAt` (not a
+user content edit). Backups zip the raw JSON, so AI fields travel with them.
 
 Filename: `link_<id>.json` (UUID chars are already path-safe).
 

@@ -2,6 +2,8 @@ package com.linkvault.app.di;
 
 import android.content.Context;
 
+import com.linkvault.app.ai.AIQueueManager;
+import com.linkvault.app.ai.LocalAiManager;
 import com.linkvault.app.data.backup.BackupEngine;
 import com.linkvault.app.data.backup.RestoreEngine;
 import com.linkvault.app.data.json.AutoCatCodec;
@@ -39,6 +41,9 @@ public class AppContainer {
     private volatile AutoCatRepository autoCatRepository;
     private volatile BackupEngine backupEngine;
     private volatile RestoreEngine restoreEngine;
+    /** Internal-storage services — independent of the SAF folder. */
+    private volatile LocalAiManager localAiManager;
+    private volatile AIQueueManager aiQueueManager;
 
     public AppContainer(Context context) {
         this.appContext = context.getApplicationContext();
@@ -135,9 +140,23 @@ public class AppContainer {
             restoreEngine = new RestoreEngine(
                     treeClient(), writeEngine(), categoryRepository(), recordRepository(),
                     fileRepository(), indexRepository(), categoryCodec, linkCodec, fileCodec,
-                    appContext.getContentResolver());
+                    appContext.getContentResolver(), aiQueueManager());
         }
         return restoreEngine;
+    }
+
+    public synchronized LocalAiManager localAiManager() {
+        if (localAiManager == null) {
+            localAiManager = new LocalAiManager(appContext);
+        }
+        return localAiManager;
+    }
+
+    public synchronized AIQueueManager aiQueueManager() {
+        if (aiQueueManager == null) {
+            aiQueueManager = new AIQueueManager(appContext);
+        }
+        return aiQueueManager;
     }
 
     public synchronized void onStorageFolderChanged() {

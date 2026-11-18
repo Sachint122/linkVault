@@ -2,6 +2,95 @@
 
 Format: date — change — impact. Newest first.
 
+## 2026-11-18 (v1.1.0 release — public APK + README)
+
+- **Version bump:** `versionCode 2` / `versionName 1.1.0`.
+- **Release APK** built with the existing release keystore
+  (`linkvault-release.jks`, gitignored; verified via apksigner —
+  CN=LinkVault) → committed as `releases/LinkVault-v1.1.0.apk`
+  (54.4 MB; replaces `releases/linkVault-debug.apk`). Raw download link
+  lives in README; `lintVitalRelease` skipped after the Gradle daemon
+  OOM-crashed on it (minify is off, non-blocking).
+- **README rewritten** end-user-first: download + install steps (unknown
+  sources / Play Protect note), feature tour (direct save, on-device AI,
+  auto-clean, organize, backup), privacy, build-from-source, docs index.
+
+## 2026-11-18 (auto-clean: AI maintains the vault — D-19)
+
+Owner: "AI khud app clean kare — unused tags/folder hatao, **link delete
+na kare**." Build green (**87/87**, 12 new `AutoCleanPlannerTest`), installed,
+launch clean; both daily WorkManager jobs verified scheduled on device.
+
+- **`AutoCleanWorker`** (daily `auto_clean_periodic`, scheduled in
+  `App.onCreate` like auto-backup):  1. **Folders** — deletes non-system categories with 0 links + 0 files, no
+     children, no Auto-Cat rule, untouched ≥30 days (`AutoCleanPlanner`,
+     grace on createdAt/updatedAt); also sweeps empty orphan
+     `user/categories/*` dirs (non-empty always kept).
+  2. **Tags** — prunes redundant tags on link records (tag == folder name,
+     singular/plural pair, blanks) via new `RecordRepository.saveTags()`
+     (no `updatedAt` bump → browse list doesn't re-sort).
+  3. **Never deletes/rewrites link or file records** — planner invariant +
+     pre-delete `countIn()` recheck vs. concurrent saves.
+  On change: index invalidate + `AiUpdateNotifier.fire(null)`; stats →
+  `lv_prefs` (`auto_clean_last_run/_last_stats`).
+- **Settings AI card:** new "Auto-clean" line (last run time + "X folder(s),
+  Y tag(s) cleaned — links kabhi delete nahi hote"; "abhi tak nahi chala"
+  before first run). Card hint updated to mention daily self-cleaning.
+
+## 2026-11-18 (zero-touch save + AI status UI — D-18)
+
+Owner: "user ko kuch karna na pade." Three changes, build green (75/75),
+installed, launch + share smoke verified on device (record created with
+`aiSource: local_ai` summary in 31 s; smoke record cleaned up).
+
+- **Direct share save (D-18):** ACTION_SEND URL shares no longer open the
+  review screen — `MainActivity.directSaveUrl()` persists on a background
+  thread (AutoCat → ungrouped), enqueues AI, updates widget/index, toasts.
+  File shares / manual add / edit / clipboard offer unchanged.
+- **Summary in list:** `item_link.xml` gains a 2-line `itemSummary` row under
+  every link; `LinksAdapter` binds `LinkRecord.summary` (hidden when null)
+  and DiffUtil now compares summary (AI fills don't bump `updatedAt`, so
+  contents-diff must catch it).
+- **Settings "On-Device AI" card:** status (worker active / model ready /
+  rules-only), model size, queue pending·failed — via new `AiQueueStore`
+  counts + `AIQueueManager.stats()`/`isWorkerActive()` and
+  `SettingsViewModel.AiStatus` (refreshed on open/resume).
+- **Prompt:** "tech" added to category examples (AiPrompt).
+
+## 2026-11-18 (on-device offline AI pipeline — LiteRT-LM)
+
+Full offline AI integration (owner directive: code + docs only, no device
+tests): background analysis that fills summary/tags/category for saved links.
+
+- **Runtime:** LiteRT-LM `0.19.1` (official Maven, CPU) — Kotlin interop
+  isolated to `ai/LocalAiEngine.kt`; Kotlin plugin **2.4.21** added (the
+  AAR ships metadata 2.4.0, unreadable by 2.0.x — discovered at build).
+  GGUF unsupported by design; model = user-pushed `.litertlm`
+  (`AI_MODEL_SETUP.md`), rule-only fallback when absent.
+- **Pipeline:** `RuleBasedAnalyzer` (19 platform rules) always runs; LLM
+  enriches when a model is present; `AiResultValidator` enforces the strict
+  JSON contract (fences/chatter stripped, ≤5 tags, ≤200-char summary,
+  clamped confidence); malformed reply → rules stand (no retry loop).
+- **Queue:** single sequential WorkManager job (`ai_queue_worker`, KEEP,
+  battery-not-low) + persistent `filesDir/ai_queue.json` (dedupe, 3-attempt
+  cap → failed list, 8-min budget with retry, process-death/reboot recovery
+  via `App.onCreate` + WorkManager persistence). Enqueue hooks:
+  `SaveLinkViewModel` (new links) and `RestoreEngine`.
+- **Schema:** 6 additive link fields (`summary, aiStatus, aiConfidence,
+  aiSource, aiAnalyzedAt, aiVersion`) in `LinkRecord`/`LinkCodec`; new
+  `RecordRepository.saveAi()` (no `updatedAt` bump, folder move) and
+  AI-carry in `update()`. Protection: summary fill-if-null, category only
+  while `cat_ungrouped` (AutoCat/user always win), tags additive ≤20.
+- **Live UI:** `AiUpdateNotifier` → `HomeViewModel.refresh()` (500 ms
+  throttle) + `IndexRepository.replaceItem`; model freed on
+  `onTrimMemory(≥BACKGROUND)`, re-init latched after real failures.
+- **Docs:** `AI_ARCHITECTURE.md`, `AI_MODEL_SETUP.md`,
+  `AI_PROCESSING_FLOW.md`, `AI_TESTING.md` (guide only, not executed),
+  `TASK.md`, `DATA_SCHEMA.md` §3 updated (AI + dead-link fields),
+  decision `D-17`.
+- Build green: `assembleDebug testDebugUnitTest` EXIT=0, **75/75** unit
+  tests (58 old + 17 new validator/rules tests).
+
 ## 2026-11-18 (app-lock removed, optimistic delete, UI polish)
 
 - **App lock (B6) fully removed** per owner decision — deleted
