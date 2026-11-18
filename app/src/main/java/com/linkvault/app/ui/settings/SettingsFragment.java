@@ -1,7 +1,9 @@
 package com.linkvault.app.ui.settings;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,10 +21,13 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.linkvault.app.R;
+import com.linkvault.app.ai.SidebarSettings;
 import com.linkvault.app.data.backup.RestoreEngine;
 import com.linkvault.app.data.saf.StoragePermissionManager;
 import com.linkvault.app.domain.model.Category;
+import com.linkvault.app.sidebar.SidebarService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -58,6 +63,10 @@ public class SettingsFragment extends Fragment {
     private TextView autoBackupStatusText;
     private MaterialButton toggleAutoBackupButton;
     private MaterialButton runBackupNowButton;
+    private TextView sidebarPermText;
+    private MaterialSwitch sidebarEnableSwitch;
+    private MaterialButton sidebarPermButton;
+    private boolean renderingSidebar;
     private SettingsViewModel viewModel;
 
     @Nullable private byte[] pendingRestoreZipBytes;
@@ -105,6 +114,22 @@ public class SettingsFragment extends Fragment {
                 }
             });
 
+    /** Returns from the system "Display over other apps" screen. */
+    private final ActivityResultLauncher<Intent> overlayPermLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                    result -> renderSidebarCard());
+
+    private void openOverlayPermissionSettings() {
+        try {
+            overlayPermLauncher.launch(new Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + requireContext().getPackageName())));
+        } catch (Exception e) {
+            Toast.makeText(requireContext(),
+                    "Permission screen nahi khula — manually dein.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -117,6 +142,7 @@ public class SettingsFragment extends Fragment {
         super.onResume();
         // Re-snapshot AI status whenever Settings becomes visible.
         if (viewModel != null) viewModel.refreshAiStatus();
+        renderSidebarCard();
     }
 
     @Override
@@ -145,6 +171,9 @@ public class SettingsFragment extends Fragment {
         autoBackupStatusText = view.findViewById(R.id.autoBackupStatusText);
         toggleAutoBackupButton = view.findViewById(R.id.toggleAutoBackupButton);
         runBackupNowButton = view.findViewById(R.id.runBackupNowButton);
+        sidebarPermText = view.findViewById(R.id.sidebarPermText);
+        sidebarEnableSwitch = view.findViewById(R.id.sidebarEnableSwitch);
+        sidebarPermButton = view.findViewById(R.id.sidebarPermButton);
 
         viewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
 
@@ -170,6 +199,29 @@ public class SettingsFragment extends Fragment {
             viewModel.toggleAutoBackup(enable);
         });
         runBackupNowButton.setOnClickListener(v -> viewModel.runAutoBackupNow());
+
+        sidebarEnableSwitch.setOnCheckedChangeListener((btn, on) -> {
+            if (renderingSidebar) return;
+            SidebarSettings sb = new SidebarSettings(requireContext());
+            if (on) {
+                if (!Settings.canDrawOverlays(requireContext())) {
+                    sb.setEnabled(false);
+                    renderingSidebar = true;
+                    btn.setChecked(false);
+                    renderingSidebar = false;
+                    openOverlayPermissionSettings();
+                    return;
+                }
+                sb.setEnabled(true);
+                SidebarService.start(requireContext());
+            } else {
+                sb.setEnabled(false);
+                SidebarService.stop(requireContext());
+            }
+            renderSidebarCard();
+        });
+        sidebarPermButton.setOnClickListener(v -> openOverlayPermissionSettings());
+        renderSidebarCard();
 
         viewModel.getState().observe(getViewLifecycleOwner(), this::renderState);
         viewModel.getSelfTest().observe(getViewLifecycleOwner(), this::renderSelfTest);
@@ -238,6 +290,36 @@ public class SettingsFragment extends Fragment {
                 selfTestResult.setText(R.string.self_test_running);
             }
         });
+    }
+
+    // ------------------------------------------------------ AI Sidebar card
+
+    private void renderSidebarCard() {
+        if (sidebarEnableSwitch == null) return;
+        boolean granted = Settings.canDrawOverlays(requireContext());
+        SidebarSettings sb = new SidebarSettings(requireContext());
+        renderingSidebar = true;
+        sidebarEnableSwitch.setChecked(sb.isEnabled());
+        renderingSidebar = false;
+        if (granted) {
+            sidebarPermButton.setVisibility(View.GONE);
+            if (sb.isEnabled()) {
+                sidebarPermText.setText("Status: chalu — edge pill dikh rahi hogi. "
+                        + "10 tones, 5 actions, history — sab panel ke andar.");
+                sidebarPermText.setTextColor(getResources().getColor(R.color.lv_success, null));
+                // Idempotent start: covers the "grant permission → return" path
+                // (pill should appear without retoggling the switch).
+                SidebarService.start(requireContext());
+            } else {
+                sidebarPermText.setText("Status: permission mil chuki hai — neeche switch on karein.");
+                sidebarPermText.setTextColor(getResources().getColor(R.color.cyber_cyan, null));
+            }
+        } else {
+            sidebarPermText.setText("Status: \"Display over other apps\" permission chahiye — "
+                    + "pill dikhane ke liye zaroori.");
+            sidebarPermText.setTextColor(getResources().getColor(R.color.cyber_amber, null));
+            sidebarPermButton.setVisibility(View.VISIBLE);
+        }
     }
 
     // -------------------------------------------------- Auto-categorize rules

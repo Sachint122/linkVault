@@ -1,0 +1,775 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:id="@+id/sidebarScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="12dp">
+
+            <!-- Section 1: Your message Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Your message"
+                    android:textColor="@color/cyber_text_primary"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hinglish · English · Hindi"
+                    android:textColor="@color/cyber_text_muted"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <!-- Message Input Box Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_card_input"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:alpha="0.12"
+                        android:src="@drawable/ic_link"
+                        app:tint="@color/cyber_cyan"
+                        android:contentDescription="@null" />
+
+                    <EditText
+                        android:id="@+id/sidebarInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:gravity="top|start"
+                        android:hint="Text type ya paste karein…"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:minLines="2"
+                        android:maxLines="4"
+                        android:paddingEnd="36dp"
+                        android:textColor="@color/cyber_text_primary"
+                        android:textColorHint="@color/cyber_text_muted"
+                        android:textSize="13.5sp" />
+                </RelativeLayout>
+
+                <!-- Input Card Bottom Toolbar -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Paste Button -->
+                    <LinearLayout
+                        android:id="@+id/btnSidebarPaste"
+                        android:layout_width="wrap_content"
+                        android:layout_height="26dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="6dp">
+
+                        <ImageView
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:src="@drawable/ic_paste"
+                            app:tint="@color/cyber_text_secondary"
+                            android:contentDescription="Paste" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="Paste"
+                            android:textColor="@color/cyber_text_secondary"
+                            android:textSize="11.5sp" />
+                    </LinearLayout>
+
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="12dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="#1F3D55" />
+
+                    <!-- Clear Button -->
+                    <LinearLayout
+                        android:id="@+id/btnSidebarClearInput"
+                        android:layout_width="wrap_content"
+                        android:layout_height="26dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="6dp">
+
+                        <ImageView
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:src="@drawable/ic_trash"
+                            app:tint="@color/cyber_text_secondary"
+                            android:contentDescription="Clear" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="Clear"
+                            android:textColor="@color/cyber_text_secondary"
+                            android:textSize="11.5sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+
+                    <!-- Character Count -->
+                    <TextView
+                        android:id="@+id/sidebarCharCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 / 500"
+                        android:textColor="@color/cyber_text_muted"
+                        android:textSize="11sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Section 2: Writing style (Tone) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_leaf"
+                    app:tint="@color/cyber_cyan"
+                    android:contentDescription="Tone" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="Writing style (Tone)"
+                    android:textColor="@color/cyber_text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/sidebarToneGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                app:chipSpacingHorizontal="6dp"
+                app:chipSpacingVertical="4dp"
+                app:selectionRequired="true"
+                app:singleSelection="true" />
+
+            <!-- Section 3: Custom instructions Card -->
+            <LinearLayout
+                android:id="@+id/customInstructionsCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_card_input"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <LinearLayout
+                    android:id="@+id/btnSidebarCustomToggle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_sliders"
+                        app:tint="@color/cyber_cyan"
+                        android:contentDescription="Custom instructions" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Custom instructions"
+                            android:textColor="@color/cyber_text_primary"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="e.g. Keep it short and professional…"
+                            android:textColor="@color/cyber_text_muted"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/customChevron"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_chevron_down"
+                        app:tint="@color/cyber_text_secondary"
+                        android:contentDescription="Expand" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/sidebarCustom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_sidebar_field"
+                    android:gravity="top|start"
+                    android:hint="Custom prompt jaise: Keep it under 2 lines"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:minLines="1"
+                    android:maxLines="2"
+                    android:padding="6dp"
+                    android:textColor="@color/cyber_text_primary"
+                    android:textColorHint="@color/cyber_text_muted"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Section 4: Action Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_bolt"
+                    app:tint="@color/cyber_cyan"
+                    android:contentDescription="Action" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="Action"
+                    android:textColor="@color/cyber_text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- 5 Action Tiles Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <!-- Rewrite -->
+                <LinearLayout
+                    android:id="@+id/btnActionRewrite"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_action_tile_selected"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/iconActionRewrite"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_pencil"
+                        app:tint="#000000"
+                        android:contentDescription="Rewrite" />
+
+                    <TextView
+                        android:id="@+id/textActionRewrite"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Rewrite"
+                        android:textColor="#000000"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Improve -->
+                <LinearLayout
+                    android:id="@+id/btnActionImprove"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_action_tile"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/iconActionImprove"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_sparkles"
+                        app:tint="@color/cyber_text_primary"
+                        android:contentDescription="Improve" />
+
+                    <TextView
+                        android:id="@+id/textActionImprove"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Improve"
+                        android:textColor="@color/cyber_text_primary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <!-- Shorten -->
+                <LinearLayout
+                    android:id="@+id/btnActionShorten"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_action_tile"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/iconActionShorten"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_shorten"
+                        app:tint="@color/cyber_text_primary"
+                        android:contentDescription="Shorten" />
+
+                    <TextView
+                        android:id="@+id/textActionShorten"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Shorten"
+                        android:textColor="@color/cyber_text_primary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <!-- Expand -->
+                <LinearLayout
+                    android:id="@+id/btnActionExpand"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_action_tile"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/iconActionExpand"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_expand"
+                        app:tint="@color/cyber_text_primary"
+                        android:contentDescription="Expand" />
+
+                    <TextView
+                        android:id="@+id/textActionExpand"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Expand"
+                        android:textColor="@color/cyber_text_primary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <!-- Translate -->
+                <LinearLayout
+                    android:id="@+id/btnActionTranslate"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_action_tile"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/iconActionTranslate"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_translate"
+                        app:tint="@color/cyber_text_primary"
+                        android:contentDescription="Translate" />
+
+                    <TextView
+                        android:id="@+id/textActionTranslate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Translate"
+                        android:textColor="@color/cyber_text_primary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Prominent CTA Button (Teal/Cyan Gradient Pill) -->
+            <FrameLayout
+                android:id="@+id/btnSidebarRunAction"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_btn_gradient"
+                android:clickable="true"
+                android:focusable="true">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_sparkles"
+                        app:tint="#FFFFFF"
+                        android:contentDescription="@null" />
+
+                    <TextView
+                        android:id="@+id/textSidebarCta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Rewrite message"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Progress Indicator Row -->
+            <LinearLayout
+                android:id="@+id/sidebarProgressRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <ProgressBar
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:indeterminateTint="@color/cyber_cyan" />
+
+                <TextView
+                    android:id="@+id/sidebarProgressText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="Likh raha hai…"
+                    android:textColor="@color/cyber_text_secondary"
+                    android:textSize="12.5sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSidebarCancel"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="6dp"
+                    android:text="Cancel"
+                    android:textColor="@color/lv_error"
+                    android:textSize="12sp"
+                    app:strokeColor="@color/lv_error" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/sidebarError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/lv_error"
+                android:textSize="12.5sp"
+                android:visibility="gone" />
+
+            <!-- Section 5: Your result Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_doc"
+                    app:tint="@color/cyber_cyan"
+                    android:contentDescription="Result" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:text="Your result"
+                    android:textColor="@color/cyber_text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <!-- Ready Status Badge -->
+                <LinearLayout
+                    android:id="@+id/sidebarResultBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="22dp"
+                    android:background="@drawable/bg_badge_ready"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="7dp"
+                    android:paddingEnd="8dp">
+
+                    <ImageView
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:src="@drawable/ic_check"
+                        app:tint="@color/cyber_emerald"
+                        android:contentDescription="Ready" />
+
+                    <TextView
+                        android:id="@+id/textResultBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="Ready"
+                        android:textColor="@color/cyber_emerald"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Result Tone Tabs Row -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/sidebarResultToneGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleLine="true"
+                    app:selectionRequired="true"
+                    app:singleSelection="true" />
+            </HorizontalScrollView>
+
+            <!-- Result Output Card (Matches Approved Reference) -->
+            <LinearLayout
+                android:id="@+id/sidebarResultCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_card_result"
+                android:orientation="vertical"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
+
+                <!-- Top Row: Output Text & Copy Button -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageButton
+                        android:id="@+id/btnSidebarCopy"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:background="@drawable/bg_badge_offline"
+                        android:contentDescription="Copy result"
+                        android:padding="6dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_copy"
+                        app:tint="@color/cyber_text_secondary" />
+
+                    <TextView
+                        android:id="@+id/sidebarResultText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toStartOf="@id/btnSidebarCopy"
+                        android:layout_marginEnd="8dp"
+                        android:minLines="2"
+                        android:hint="Yahan output aayega…"
+                        android:textColor="@color/cyber_text_primary"
+                        android:textColorHint="@color/cyber_text_muted"
+                        android:textIsSelectable="true"
+                        android:textSize="13.5sp" />
+                </RelativeLayout>
+
+                <!-- Bottom Row: Attribution Badge & Action Buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Offline Model Attribution Badge -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="22dp"
+                        android:background="@drawable/bg_badge_offline"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="5dp">
+
+                        <ImageView
+                            android:layout_width="11dp"
+                            android:layout_height="11dp"
+                            android:src="@drawable/ic_chip"
+                            app:tint="@color/cyber_cyan"
+                            android:contentDescription="Offline AI" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="3dp"
+                            android:text="Generated offline · Qwen3-0.6B"
+                            android:textColor="@color/cyber_text_muted"
+                            android:textSize="9sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+
+                    <!-- Regenerate Button -->
+                    <LinearLayout
+                        android:id="@+id/btnSidebarRegen"
+                        android:layout_width="wrap_content"
+                        android:layout_height="22dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="2dp"
+                        android:paddingEnd="2dp">
+
+                        <ImageView
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:src="@drawable/ic_refresh"
+                            app:tint="@color/cyber_text_secondary"
+                            android:contentDescription="Regenerate" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="2dp"
+                            android:text="Regenerate"
+                            android:textColor="@color/cyber_text_secondary"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+
+                    <!-- Result Clear Button -->
+                    <LinearLayout
+                        android:id="@+id/btnSidebarResultClear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="22dp"
+                        android:layout_marginStart="4dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="2dp"
+                        android:paddingEnd="2dp">
+
+                        <ImageView
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:src="@drawable/ic_trash"
+                            app:tint="@color/cyber_text_secondary"
+                            android:contentDescription="Clear" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="2dp"
+                            android:text="Clear"
+                            android:textColor="@color/cyber_text_secondary"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

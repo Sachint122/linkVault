@@ -97,13 +97,16 @@ public class AiWorker extends Worker {
         AiResult result = rules;
         String source = LinkRecord.AI_SOURCE_RULE;
 
-        // 2) LLM enrichment when a model is present.
+        // 2) LLM enrichment when a model is present — routed through the
+        //    shared InferenceQueue so link AI and the writing sidebar never
+        //    run two inferences at once (spec §6).
         if (ai.isModelReady()) {
-            String raw = ai.generate(
+            String raw = c.inferenceQueue().generateSync(
                     AiPrompt.SYSTEM,
                     AiPrompt.userPrompt(working.getUrl(), working.getTitle(),
                             working.getTags(), categoryNameOf(c, working.getCategoryId())),
-                    AiContract.MAX_OUTPUT_TOKENS);
+                    AiContract.MAX_OUTPUT_TOKENS,
+                    AiContract.GEN_TIMEOUT_MS);
             if (raw != null) {
                 AiResult llm = AiResultValidator.parse(raw);
                 if (llm != null) {

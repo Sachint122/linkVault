@@ -157,6 +157,69 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- AI Sidebar (spec §10): enable toggle + overlay permission only.
+             Remaining 5 settings live inside the sidebar's own Settings view. -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/cyber_surface_card"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="1dp"
+            app:strokeColor="@color/cyber_border"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Sidebar"
+                    android:textColor="@color/cyber_cyan"
+                    android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+                <TextView
+                    android:id="@+id/sidebarPermText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/sidebarEnableSwitch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Enable Sidebar"
+                    android:textColor="@color/cyber_text_primary"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Edge pill har jagah rahegi — tap se panel, drag se position. Panel ke andar History, 10 tones, 5 actions aur baaki settings milte hain. Sab kuch offline — Qwen3-0.6B engine wahi jo links analyze karta hai."
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="@color/cyber_text_secondary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/sidebarPermButton"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Overlay permission dein"
+                    android:textColor="@color/cyber_text_primary"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    app:strokeColor="@color/cyber_cyan" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

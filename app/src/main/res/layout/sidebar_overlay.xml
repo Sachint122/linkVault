@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/sidebarRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Dim layer: shown only in expanded state; tap = collapse. -->
+    <View
+        android:id="@+id/sidebarDim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#B3000000"
+        android:alpha="0"
+        android:clickable="false"
+        android:focusable="false" />
+
+    <!-- Panel: size + centering set in code (84% width, screenH - clearance). -->
+    <LinearLayout
+        android:id="@+id/sidebarPanel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/bg_sidebar_panel"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <!-- Header (Matches Approved Sidebar Reference) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <!-- LinkVault Logo Squircle -->
+            <ImageView
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:src="@drawable/ic_linkvault_logo"
+                android:contentDescription="@string/app_name" />
+
+            <!-- Title & Subtitle -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="LinkVault "
+                        android:textColor="@color/cyber_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="AI"
+                        android:textColor="@color/cyber_cyan"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Writing Assistant"
+                    android:textColor="@color/cyber_text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <!-- Circular History Action Button -->
+            <ImageButton
+                android:id="@+id/btnSidebarHistory"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_btn_circle"
+                android:contentDescription="History"
+                android:padding="7dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_history"
+                app:tint="@color/cyber_text_primary" />
+
+            <!-- Circular Settings Action Button -->
+            <ImageButton
+                android:id="@+id/btnSidebarSettings"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_btn_circle"
+                android:contentDescription="Settings"
+                android:padding="7dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_settings"
+                app:tint="@color/cyber_text_primary" />
+
+            <!-- Circular Close Action Button -->
+            <ImageButton
+                android:id="@+id/btnSidebarClose"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_btn_circle"
+                android:contentDescription="Close"
+                android:padding="7dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_close"
+                app:tint="@color/cyber_text_secondary" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/cyber_border" />
+
+        <FrameLayout
+            android:id="@+id/sidebarContent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <include
+                android:id="@+id/sidebarMainView"
+                layout="@layout/sidebar_main" />
+
+            <include
+                android:id="@+id/sidebarHistoryView"
+                layout="@layout/sidebar_history"
+                android:visibility="gone" />
+
+            <include
+                android:id="@+id/sidebarSettingsView"
+                layout="@layout/sidebar_settings"
+                android:visibility="gone" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <!-- Collapsed pill: patla lamba edge handle — drag to move, slide inward to expand. -->
+    <FrameLayout
+        android:id="@+id/sidebarPill"
+        android:layout_width="10dp"
+        android:layout_height="88dp"
+        android:layout_gravity="end|center_vertical"
+        android:background="@drawable/bg_sidebar_pill"
+        android:clickable="true"
+        android:focusable="true"
+        android:contentDescription="LinkVault sidebar — slide inward to open">
+
+        <View
+            android:id="@+id/sidebarDot"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="7dp"
+            android:background="@drawable/bg_sidebar_dot"
+            android:visibility="gone" />
+    </FrameLayout>
+</FrameLayout>

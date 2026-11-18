@@ -30,3 +30,6 @@ keystore.properties
 
 # Kotlin build cache
 .kotlin/
+
+# Local source backups
+backup_source/

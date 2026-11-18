@@ -3,6 +3,7 @@ package com.linkvault.app.di;
 import android.content.Context;
 
 import com.linkvault.app.ai.AIQueueManager;
+import com.linkvault.app.ai.InferenceQueue;
 import com.linkvault.app.ai.LocalAiManager;
 import com.linkvault.app.data.backup.BackupEngine;
 import com.linkvault.app.data.backup.RestoreEngine;
@@ -44,6 +45,11 @@ public class AppContainer {
     /** Internal-storage services — independent of the SAF folder. */
     private volatile LocalAiManager localAiManager;
     private volatile AIQueueManager aiQueueManager;
+    /**
+     * Single shared inference queue (sidebar writing assistant + link
+     * summarization) in front of the one model instance.
+     */
+    private volatile InferenceQueue inferenceQueue;
 
     public AppContainer(Context context) {
         this.appContext = context.getApplicationContext();
@@ -157,6 +163,14 @@ public class AppContainer {
             aiQueueManager = new AIQueueManager(appContext);
         }
         return aiQueueManager;
+    }
+
+    /** One queue, one engine: both AI tasks serialize through this. */
+    public synchronized InferenceQueue inferenceQueue() {
+        if (inferenceQueue == null) {
+            inferenceQueue = new InferenceQueue(localAiManager()::generate);
+        }
+        return inferenceQueue;
     }
 
     public synchronized void onStorageFolderChanged() {

@@ -3,15 +3,15 @@
     <style name="Theme.LinkVault" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/cyber_cyan</item>
         <item name="colorOnPrimary">@color/cyber_bg</item>
-        <item name="colorPrimaryContainer">@color/cyber_surface_elevated</item>
+        <item name="colorPrimaryContainer">@color/cyber_teal_container</item>
         <item name="colorOnPrimaryContainer">@color/cyber_text_primary</item>
-        <item name="colorSecondary">@color/cyber_purple</item>
+        <item name="colorSecondary">@color/cyber_teal</item>
         <item name="colorOnSecondary">@color/cyber_bg</item>
         <item name="colorSurface">@color/cyber_surface</item>
         <item name="colorOnSurface">@color/cyber_text_primary</item>
         <item name="android:windowBackground">@color/cyber_bg</item>
         <item name="android:statusBarColor">@color/cyber_bg</item>
-        <item name="android:navigationBarColor">@color/cyber_bg</item>
+        <item name="android:navigationBarColor">@color/cyber_bottom_nav_bg</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

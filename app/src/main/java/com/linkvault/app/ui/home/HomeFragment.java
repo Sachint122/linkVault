@@ -76,7 +76,7 @@ public class HomeFragment extends Fragment implements LinksAdapter.Listener {
     private android.widget.TextView storageWarningText;
     private AutoCompleteTextView searchInput;
     private ImageButton searchClearButton;
-    private com.google.android.material.floatingactionbutton.FloatingActionButton fabAddLink;
+    private View fabAddLink;
     private View selectionBar;
     private MaterialButton shareSelectedButton;
     private MaterialButton deleteSelectedButton;
@@ -133,10 +133,10 @@ public class HomeFragment extends Fragment implements LinksAdapter.Listener {
         linksList.setLayoutManager(new LinearLayoutManager(requireContext()));
         androidx.recyclerview.widget.DefaultItemAnimator animator =
                 new androidx.recyclerview.widget.DefaultItemAnimator();
-        animator.setAddDuration(220);
-        animator.setRemoveDuration(200);
-        animator.setChangeDuration(180);
-        animator.setMoveDuration(220);
+        animator.setAddDuration(100);
+        animator.setRemoveDuration(90);
+        animator.setChangeDuration(90);
+        animator.setMoveDuration(100);
         linksList.setItemAnimator(animator);
         adapter = new LinksAdapter();
         adapter.setListener(this);
@@ -206,6 +206,12 @@ public class HomeFragment extends Fragment implements LinksAdapter.Listener {
                 viewModel.setTypeFilter(null);
             }
         });
+        View chipAll = view.findViewById(R.id.chipTypeAll);
+        if (chipAll != null) chipAll.setOnClickListener(v -> viewModel.setTypeFilter(null));
+        View chipLinks = view.findViewById(R.id.chipTypeLinks);
+        if (chipLinks != null) chipLinks.setOnClickListener(v -> viewModel.setTypeFilter(VaultItem.ItemType.LINK));
+        View chipFiles = view.findViewById(R.id.chipTypeFiles);
+        if (chipFiles != null) chipFiles.setOnClickListener(v -> viewModel.setTypeFilter(VaultItem.ItemType.FILE));
 
         fabAddLink.setOnClickListener(v -> showAddOptionsDialog());
         shareSelectedButton.setOnClickListener(v -> shareSelected());
@@ -214,6 +220,89 @@ public class HomeFragment extends Fragment implements LinksAdapter.Listener {
 
         storageWarningCard.setOnClickListener(v ->
                 Navigation.findNavController(view).navigate(R.id.settingsFragment));
+
+        // Header Actions
+        View headerSearch = view.findViewById(R.id.headerSearchBtn);
+        if (headerSearch != null) {
+            headerSearch.setOnClickListener(v -> {
+                if (searchInput != null) {
+                    searchInput.requestFocus();
+                    android.view.inputmethod.InputMethodManager imm =
+                            (android.view.inputmethod.InputMethodManager) requireContext()
+                                    .getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) imm.showSoftInput(searchInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+                }
+            });
+        }
+
+        View headerAi = view.findViewById(R.id.headerAiBtn);
+        if (headerAi != null) {
+            headerAi.setOnClickListener(v -> {
+                com.linkvault.app.sidebar.SidebarService.expand(requireContext());
+            });
+        }
+
+        View headerMenu = view.findViewById(R.id.headerMenuBtn);
+        if (headerMenu != null) {
+            headerMenu.setOnClickListener(v -> {
+                androidx.appcompat.widget.PopupMenu popup =
+                        new androidx.appcompat.widget.PopupMenu(requireContext(), v);
+                popup.inflate(R.menu.menu_main);
+                popup.setOnMenuItemClickListener(item -> {
+                    int id = item.getItemId();
+                    if (id == R.id.menu_categories) {
+                        Navigation.findNavController(requireView()).navigate(R.id.categoriesFragment);
+                        return true;
+                    }
+                    if (id == R.id.menu_settings) {
+                        Navigation.findNavController(requireView()).navigate(R.id.settingsFragment);
+                        return true;
+                    }
+                    return false;
+                });
+                popup.show();
+            });
+        }
+
+        View filterSliders = view.findViewById(R.id.filterSlidersBtn);
+        if (filterSliders != null) {
+            filterSliders.setOnClickListener(v -> {
+                if (tagChipGroup != null) {
+                    tagChipGroup.setVisibility(tagChipGroup.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+                }
+            });
+        }
+
+        // Bottom Navigation Bar Tabs
+        View navHome = view.findViewById(R.id.navTabHome);
+        if (navHome != null) {
+            navHome.setOnClickListener(v -> {
+                if (linksList != null) linksList.smoothScrollToPosition(0);
+            });
+        }
+
+        View navFolders = view.findViewById(R.id.navTabFolders);
+        if (navFolders != null) {
+            navFolders.setOnClickListener(v -> {
+                Navigation.findNavController(requireView()).navigate(R.id.categoriesFragment);
+            });
+        }
+
+        View navTags = view.findViewById(R.id.navTabTags);
+        if (navTags != null) {
+            navTags.setOnClickListener(v -> {
+                if (tagChipGroup != null) {
+                    tagChipGroup.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+
+        View navSettings = view.findViewById(R.id.navTabSettings);
+        if (navSettings != null) {
+            navSettings.setOnClickListener(v -> {
+                Navigation.findNavController(requireView()).navigate(R.id.settingsFragment);
+            });
+        }
 
         setupMenu();
         observe();

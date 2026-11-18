@@ -2,6 +2,82 @@
 
 Format: date — change — impact. Newest first.
 
+## 2026-11-19 (Unified UI/UX Redesign: Home Screen & AI Writing Assistant Sidebar)
+
+Owner directive:
+- **Reference Preservation:** Created `theme/` and saved reference images (`theme/home_reference.webp`, `theme/sidebar_reference.jpg`).
+- **Unified Design Tokens:** Dark navy/charcoal (`#000B10`, `#091720`) with cyan/teal accents (`#00F0FF`, `#00E5FF`). Purple and violet completely eliminated.
+- **Home Screen Redesign:**
+  - Modern header with squircle branding, search icon, AI sparkles button, and 3-dots menu.
+  - Cyber capsule search bar with sliders filter trigger.
+  - Type filter chips (`✓ All`, `🔗 Links`, `📁 Files`) with immediate category/file filtering.
+  - Dynamic folder and tag chips.
+  - Link/file cards with rounded corners, left squircle icon (detects GitHub Octocat logo), cyan URLs, 2-line summaries, category & tag badges, circular chevron expander, and 3-dots item menu.
+  - Floating cyan squircle FAB (`+`).
+  - Fixed bottom navigation bar with active glowing `Home` tab, `Folders`, `Tags`, and `Settings`.
+- **AI Writing Assistant Sidebar Redesign:**
+  - Dark navy panel (`28dp` corners, cyan stroke) with LinkVault AI branding and circular control buttons.
+  - "Your message" card with faint chain link watermark, Paste, Clear, and live character counter.
+  - "Writing style (Tone)" chips with `✓ Professional` cyan checkmark and `More ∨` expansion toggle.
+  - "Custom instructions" expandable card with chevron rotation.
+  - 5 Action Tiles (Rewrite, Improve, Shorten, Expand, Translate) with selected tile highlighted in cyan.
+  - Grand glowing gradient CTA button ("✨ Rewrite message").
+  - "Your result" card with `✓ Ready` badge, tone tabs, and compact footer row ("Generated offline · Qwen3-0.6B", "Regenerate", "Clear").
+  - Dynamic height with navigation bar clearance so the bottom border floats cleanly without any clipping.
+- **Zero Regression & Build:** 122/122 unit tests green (`EXIT=0`), output APK saved to `releases\linkVault-debug.apk` and installed live on Realme RMX3660 (`e893ddcf`).
+
+
+## 2026-11-18 (Sidebar Polish: Inward-Slide to Open, Back-Gesture Exclusion, Bottom Border Fix, Source Backup)
+
+Owner directive:
+- **Full Source Code Backup:** `backup_source/link_vault_source_backup_20261118_225501.zip` (163 files, 26.87 MB) safely created before changes.
+- **Mis-touch Prevention (Slide-to-Open):** Handle par accidental tap/touch se panel open nahi hoga. Only deliberate inward slide (>16dp) opens the writing assistant.
+- **System Back-Gesture Protection:** `setSystemGestureExclusionRects()` registers the pill area on Android 10+ so edge swipes on the pill trigger the assistant without activating Android's system back gesture.
+- **Bottom Border & Window Cut-Off Fix:** Floating window calculation accounts for dynamic navigation bar insets + 12dp bottom clearance. The entire bottom border and rounded corners float above the system navigation bar with zero clipping.
+- **Build & Device Update:** 122/122 unit tests green (EXIT=0), APK installed on Realme RMX3660 (`e893ddcf`), app relaunched.
+
+## 2026-11-18 (Sidebar UI Polish: Slim pill, Compact interface, Snappy animations, "AI" removed)
+
+Owner directive:
+- **Patla lamba pill:** Edge handle ko rounded square se sleek, slim vertical bar (10dp width, 88dp height, 5dp capsule radius) banaya.
+- **"AI" word removed:** User-facing labels se "AI" word completely hataya (header: "Writing Assistant", notifications: "LinkVault Sidebar", settings: "Sidebar", status: "Likh raha hai…").
+- **Compact mini interface:** Spacings, paddings, button heights (30-32dp), input minLines, chip touch sizes compact kiye — panel tight aur sleek dikhta hai.
+- **Ultra-fast UI & Snappy animations:** Overlay expand/collapse animation duration 170ms → 80ms kiya, RecyclerView item animators 220ms → 90-100ms kiye. Zero lag, high responsiveness.
+- **Updated APK installed on device:** `app-debug.apk` built and installed on Realme RMX3660 via ADB.
+
+## 2026-11-18 (AI Sidebar: system-wide writing assistant — D-20)
+
+Owner directive: floating AI panel app-wide — pill on edge, 10 tones,
+5 actions, history, settings — sab **existing** Qwen3-0.6B engine par,
+offline-only. Build green (**122/122**, 35 new: `InferenceQueueTest` 11,
+`WritingPromptTest` 8, `WritingValidatorTest` 9, `WritingHistoryTest` 7);
+device install/test pending (owner connecting device).
+
+- **Shared queue:** new `ai/InferenceQueue` (single daemon FIFO,
+  exactly-once delivery, cancel = discard pending pre-run / drop in-flight
+  output — LiteRT-LM has no cancel API); `AiWorker.generateSync` and the
+  sidebar both submit through it — one model, one runtime, no parallel runs.
+- **AI core (pure Java):** `WritingAction` (5), `WritingTone` (10),
+  `WritingPrompt` (system per action+tone+custom), `WritingValidator`
+  (preamble-strip + garbage reject), `WritingHistory` (local 10-entry
+  FIFO), `SidebarSettings` (`sidebar_prefs`); `AiContract` += 640-token
+  cap + `SIDEBAR_WINDOW_TAG`.
+- **Overlay:** `sidebar/SidebarService` (specialUse FGS, notif 4701, no
+  POST_NOTIFICATIONS, START_STICKY, foreground-only start, no boot
+  receiver) hosting **one** window: drag-snapping pill (persist edge+y)
+  ⇄ 87% panel (dim, IME-aware, outside-tap collapse) with main view
+  (input/paste, tone chips, custom instructions, 5 actions, cancel,
+  result card + tone tabs + copy/regen), History view, Settings view
+  (6 toggles). Staleness guards: runSeq/syncingChips/renderingSettings/
+  displayedIsHistoryEntry. Clipboard read only on expand or Paste.
+- **UI:** 5 layouts (`sidebar_*`), 6 drawables (5 bg + `ic_stat_sidebar`);
+  AndroidManifest += SYSTEM_ALERT_WINDOW / FOREGROUND_SERVICE /
+  FOREGROUND_SERVICE_SPECIAL_USE / VIBRATE + service block; Settings app
+  card (Enable + permission button) in `fragment_settings.xml`;
+  guarded `SidebarService.start` in `MainActivity.onCreate`.
+- **Docs:** `brain/AI_SIDEBAR.md` (architecture + device checklist),
+  D-20 in DECISIONS.
+
 ## 2026-11-18 (v1.1.0 release — public APK + README)
 
 - **Version bump:** `versionCode 2` / `versionName 1.1.0`.

@@ -30,6 +30,16 @@ public final class AiContract {
     /** Output token cap for the JSON reply. */
     public static final int MAX_OUTPUT_TOKENS = 320;
 
+    /**
+     * Output token cap for writing-assistant replies (sidebar). Higher than
+     * the JSON cap: Expand/Translate can legitimately run long, and
+     * WritingValidator.sanitize() enforces the final char limit anyway.
+     */
+    public static final int MAX_WRITE_TOKENS = 640;
+
+    /** Overlay window tag for the AI Sidebar (used by WindowManager). */
+    public static final String SIDEBAR_WINDOW_TAG = "linkvault-ai-sidebar";
+
     /** Record-level tag cap (mirrors LinkCodec write-side limit). */
     public static final int MAX_RECORD_TAGS = 20;
 

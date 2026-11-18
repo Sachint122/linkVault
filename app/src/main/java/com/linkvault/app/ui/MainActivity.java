@@ -50,6 +50,11 @@ public class MainActivity extends AppCompatActivity {
                 R.id.homeFragment, R.id.onboardingFragment).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfig);
 
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            boolean isHome = destination.getId() == R.id.homeFragment;
+            toolbar.setVisibility(isHome ? android.view.View.GONE : android.view.View.VISIBLE);
+        });
+
         // Clean Back button behavior: exit app from Home, never loop
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -84,6 +89,13 @@ public class MainActivity extends AppCompatActivity {
                 && container().permissionManager().getAccessState()
                 == StoragePermissionManager.AccessState.GRANTED) {
             consumePendingShare();
+        }
+
+        // AI Sidebar (spec §7): pill reappears on app open when enabled +
+        // permitted. Guarded foreground start only — no background/boot start.
+        if (new com.linkvault.app.ai.SidebarSettings(this).isEnabled()
+                && android.provider.Settings.canDrawOverlays(this)) {
+            com.linkvault.app.sidebar.SidebarService.start(this);
         }
     }
 

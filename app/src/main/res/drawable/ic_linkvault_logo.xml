@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="44dp"
+    android:height="44dp"
+    android:viewportWidth="44"
+    android:viewportHeight="44">
+
+    <!-- Squircle Background -->
+    <path
+        android:fillColor="#082228"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="1.2"
+        android:pathData="M12,4 L32,4 C36.4,4 40,7.6 40,12 L40,32 C40,36.4 36.4,40 32,40 L12,40 C7.6,40 4,36.4 4,32 L4,12 C4,7.6 7.6,4 12,4 Z" />
+
+    <!-- Chain Link -->
+    <path
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M18,26 L15.5,28.5 C13.5,30.5 13.5,33.5 15.5,35.5 C17.5,37.5 20.5,37.5 22.5,35.5 L25,33 M20,24 L24,20 M19,11 L21.5,8.5 C23.5,6.5 26.5,6.5 28.5,8.5 C30.5,10.5 30.5,13.5 28.5,15.5 L26,18" />
+
+    <!-- Sparkle Accent -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M11,12 C11,10 12,9 14,9 C12,9 11,8 11,6 C11,8 10,9 8,9 C10,9 11,10 11,12 Z" />
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M34,33 C34,32 34.5,31.5 35.5,31.5 C34.5,31.5 34,31 34,30 C34,31 33.5,31.5 32.5,31.5 C33.5,31.5 34,32 34,33 Z" />
+</vector>

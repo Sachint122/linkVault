@@ -11,13 +11,98 @@
         android:layout_height="match_parent"
         android:src="@drawable/bg_cyber_vault"
         android:scaleType="centerCrop"
-        android:alpha="0.22"
+        android:alpha="0.16"
         android:contentDescription="@null" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
+        <!-- Top Branding App Bar (Matches Approved Home Reference) -->
+        <LinearLayout
+            android:id="@+id/homeTopBar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp">
+
+            <!-- LinkVault Logo -->
+            <ImageView
+                android:id="@+id/headerLogo"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:src="@drawable/ic_linkvault_logo"
+                android:contentDescription="@string/app_name" />
+
+            <!-- Brand Title & Tagline -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/headerTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LinkVault"
+                    android:textColor="@color/cyber_text_primary"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/headerSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-1dp"
+                    android:text="Save · Organize · Access"
+                    android:textColor="@color/cyber_text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <!-- Search Action Button -->
+            <ImageButton
+                android:id="@+id/headerSearchBtn"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_btn_circle"
+                android:contentDescription="Search"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_search"
+                app:tint="@color/cyber_cyan" />
+
+            <!-- AI Sparkles Action Button -->
+            <ImageButton
+                android:id="@+id/headerAiBtn"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_btn_circle"
+                android:contentDescription="AI Writing Assistant"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_sparkles"
+                app:tint="@color/cyber_cyan" />
+
+            <!-- Overflow Menu Button -->
+            <ImageButton
+                android:id="@+id/headerMenuBtn"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="6dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/menu_more"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_more_vert"
+                app:tint="@color/cyber_text_secondary" />
+        </LinearLayout>
 
         <!-- Storage Warning Banner -->
         <com.google.android.material.card.MaterialCardView
@@ -39,18 +124,18 @@
                 android:textAppearance="?attr/textAppearanceBodyMedium" />
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Modern Cyber Search Bar -->
+        <!-- Modern Cyber Search Bar Capsule -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/searchCard"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="48dp"
             android:layout_marginStart="14dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="14dp"
             android:layout_marginBottom="6dp"
-            app:cardBackgroundColor="@color/cyber_surface"
-            app:cardCornerRadius="25dp"
-            app:cardElevation="3dp"
+            app:cardBackgroundColor="@color/cyber_surface_card"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
             app:strokeWidth="1dp"
             app:strokeColor="@color/cyber_border">
 
@@ -63,8 +148,8 @@
                 android:paddingEnd="10dp">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_search"
                     app:tint="@color/cyber_cyan"
                     android:contentDescription="@null" />
@@ -80,21 +165,30 @@
                     android:hint="Search links, files, tags..."
                     android:textColorHint="@color/cyber_text_muted"
                     android:textColor="@color/cyber_text_primary"
+                    android:textSize="13.5sp"
                     android:imeOptions="actionSearch"
                     android:inputType="text"
                     android:completionThreshold="1"
-                    android:maxLines="1"
-                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+                    android:maxLines="1" />
 
                 <ImageButton
                     android:id="@+id/searchClearButton"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="Clear"
                     android:src="@android:drawable/ic_menu_close_clear_cancel"
                     app:tint="@color/cyber_cyan"
                     android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/filterSlidersBtn"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/ic_sliders"
+                    app:tint="@color/cyber_cyan"
+                    android:contentDescription="Filter options" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -105,7 +199,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="14dp"
             android:layout_marginEnd="14dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="2dp"
             android:layout_marginBottom="4dp"
             app:singleSelection="true"
             app:selectionRequired="true">
@@ -120,6 +214,9 @@
                 app:chipStrokeColor="@color/chip_stroke_cyber"
                 app:chipStrokeWidth="1.2dp"
                 android:textColor="@color/chip_text_cyber"
+                app:checkedIcon="@drawable/ic_check"
+                app:checkedIconVisible="true"
+                app:checkedIconTint="@color/cyber_cyan"
                 android:text="All" />
 
             <com.google.android.material.chip.Chip
@@ -131,6 +228,7 @@
                 app:chipStrokeColor="@color/chip_stroke_cyber"
                 app:chipStrokeWidth="1.2dp"
                 android:textColor="@color/chip_text_cyber"
+                app:checkedIconVisible="false"
                 android:text="🔗 Links" />
 
             <com.google.android.material.chip.Chip
@@ -142,6 +240,7 @@
                 app:chipStrokeColor="@color/chip_stroke_cyber"
                 app:chipStrokeWidth="1.2dp"
                 android:textColor="@color/chip_text_cyber"
+                app:checkedIconVisible="false"
                 android:text="📁 Files" />
         </com.google.android.material.chip.ChipGroup>
 
@@ -150,7 +249,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="none"
-            android:paddingTop="2dp"
+            android:paddingTop="1dp"
             android:paddingBottom="2dp">
 
             <com.google.android.material.chip.ChipGroup
@@ -168,7 +267,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="none"
-            android:paddingBottom="6dp">
+            android:paddingBottom="4dp">
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/tagChipGroup"
@@ -192,8 +291,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:paddingTop="4dp"
-                android:paddingBottom="96dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="84dp"
                 android:layoutAnimation="@anim/layout_anim_cards" />
 
             <LinearLayout
@@ -207,10 +306,9 @@
                 android:visibility="gone">
 
                 <ImageView
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
-                    android:alpha="0.5"
-                    android:src="@drawable/ic_vault_logo"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_linkvault_logo"
                     android:contentDescription="@null" />
 
                 <TextView
@@ -232,7 +330,7 @@
                 android:layout_gravity="bottom"
                 android:layout_marginStart="14dp"
                 android:layout_marginEnd="14dp"
-                android:layout_marginBottom="84dp"
+                android:layout_marginBottom="72dp"
                 android:elevation="6dp"
                 android:orientation="horizontal"
                 android:visibility="gone">
@@ -264,19 +362,149 @@
                     android:text="@string/selection_cancel" />
             </LinearLayout>
         </FrameLayout>
+
+        <!-- Bottom Navigation Bar (Matches Approved Home Reference) -->
+        <LinearLayout
+            android:id="@+id/bottomNavBar"
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:background="@drawable/bg_bottom_nav"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
+
+            <!-- Tab 1: Home (Selected) -->
+            <LinearLayout
+                android:id="@+id/navTabHome"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_bottom_nav_indicator"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_home"
+                    app:tint="@color/cyber_cyan"
+                    android:contentDescription="Home" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="Home"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Tab 2: Folders -->
+            <LinearLayout
+                android:id="@+id/navTabFolders"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_folder"
+                    app:tint="@color/cyber_text_secondary"
+                    android:contentDescription="Folders" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Folders"
+                    android:textColor="@color/cyber_text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <!-- Tab 3: Tags -->
+            <LinearLayout
+                android:id="@+id/navTabTags"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_tag"
+                    app:tint="@color/cyber_text_secondary"
+                    android:contentDescription="Tags" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Tags"
+                    android:textColor="@color/cyber_text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <!-- Tab 4: Settings -->
+            <LinearLayout
+                android:id="@+id/navTabSettings"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_settings"
+                    app:tint="@color/cyber_text_secondary"
+                    android:contentDescription="Settings" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Settings"
+                    android:textColor="@color/cyber_text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- Glowing Cyber FAB -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <!-- Glowing Cyan Squircle FAB (Matches Home Reference) -->
+    <ImageButton
         android:id="@+id/fabAddLink"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_gravity="bottom|end"
-        android:layout_margin="20dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="74dp"
+        android:background="@drawable/bg_fab_cyan"
         android:contentDescription="@string/fab_add_link"
-        app:backgroundTint="@color/cyber_cyan"
-        app:tint="@color/cyber_bg"
-        app:elevation="6dp"
-        app:srcCompat="@drawable/ic_add" />
+        android:elevation="8dp"
+        android:padding="16dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_add"
+        app:tint="#000000" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

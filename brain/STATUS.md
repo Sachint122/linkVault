@@ -1,7 +1,7 @@
 # STATUS
 
 **Last updated:** 2026-11-18
-**Updated by:** AI session — v1.1.0 release: README rewrite + signed release APK staged for push
+**Updated by:** AI session — AI Sidebar (D-20): full code + docs, 122/122 green; device test pending (owner connecting device)
 
 ## Current phase
 
@@ -12,12 +12,21 @@
 **Zero-touch save + AI status UI (D-18): ✅ installed, share smoke verified on device**
 **Auto-clean pass (D-19): ✅ installed, daily job verified scheduled on device**
 **v1.1.0 release: ✅ README + signed APK ready → pushed for public download**
+**AI Sidebar (D-20): ✅ CODE COMPLETE + POLISHED (inward-slide gesture, gesture-exclusion back protection, bottom border fix, full source backup preserved) — ✅ INSTALLED ON DEVICE (`e893ddcf`)**
+**Unified UI/UX Redesign (Home & AI Sidebar): ✅ 100% COMPLETE & VERIFIED ON REAL DEVICE (`e893ddcf`)**
+- Exact visual parity with approved references (`theme/home_reference.webp` and `theme/sidebar_reference.jpg`).
+- Dark navy `#000B10` & cyber cyan `#00F0FF` palette (strictly zero purple/violet).
+- Modern capsule search, `All` / `Links` / `Files` chips, folders, tags, GitHub Octocat cards, cyan squircle FAB, glowing bottom navigation.
+- AI Writing Assistant Sidebar with watermark, tone chips + `More ∨` toggle, custom prompt, 5 action tiles, grand CTA, and compact attribution footer.
+- All 122 unit tests passing, zero regressions.
+- Release APK updated at `releases\linkVault-debug.apk`.
 
 ## Repository state
 
-- Build: `assembleDebug testDebugUnitTest` **EXIT=0**; **87/87** unit tests pass
-  (12 new: `AutoCleanPlannerTest`; earlier 17: `AiResultValidatorTest`,
-  `RuleBasedAnalyzerTest`).
+- Build: `assembleDebug testDebugUnitTest` **EXIT=0**; **122/122** unit tests pass
+  (35 new for AI Sidebar: `InferenceQueueTest` 11, `WritingPromptTest` 8,
+  `WritingValidatorTest` 9, `WritingHistoryTest` 7; earlier 87 incl.
+  `AutoCleanPlannerTest`, `AiResultValidatorTest`, `RuleBasedAnalyzerTest`).
 - Release signing configured (`keystore.properties` gitignored).
 - GitHub remote `Sachint122/linkVault` on `main` — last push `323025b`
   (batches 1–10 + app-lock removal + optimistic delete + UI polish).

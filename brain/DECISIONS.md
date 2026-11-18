@@ -185,6 +185,33 @@ Promote PROPOSED → APPROVED only on explicit product-owner confirmation.
   (not LLM) because the decisions are structural, cheap, and must be
   provably safe; LLM stays in the enrichment path only (D-17).
 
+## D-20 — AI Sidebar: system-wide writing assistant (spec A §14)
+
+- **Status:** **APPROVED** (2026-11-18, product-owner spec directive)
+- **Decision:** one system-wide overlay window (pill ⇄ panel) hosted by a
+  `FOREGROUND_SERVICE_SPECIAL_USE` service, driven by the **existing**
+  Qwen3-0.6B/LiteRT-LM engine through the **same** `InferenceQueue` as
+  link-AI (single daemon FIFO, exactly-once, pending-cancel / in-flight
+  discard — LiteRT-LM has no cancel API). 10 tones, 5 actions
+  (Rewrite/Improve/Shorten/Expand/Translate), 10-entry local history,
+  6 settings in `sidebar_prefs`, clipboard read only on expand/Paste.
+  Start only from the Settings toggle or `MainActivity.onCreate`
+  (foreground); no boot receiver, no Accessibility service, no second
+  model, no cloud, no network.
+- **Permissions:** `SYSTEM_ALERT_WINDOW`, `FOREGROUND_SERVICE`,
+  `FOREGROUND_SERVICE_SPECIAL_USE` (+ `PROPERTY_SPECIAL_USE_FGS_SUBTYPE`),
+  `VIBRATE`; deliberately **no** `POST_NOTIFICATIONS` (FGS notif exempt).
+- **Settings placement:** main Settings card = Enable + overlay-permission
+  status only; the other 5 settings live in the panel's Settings view
+  (spec §6).
+- **Why:** owner spec handed the full feature (pill everywhere, reuse the
+  local engine, background processing so long generations survive app
+  switch). Shared queue keeps one-model/one-runtime rule and prevents two
+  concurrent generations; single-window design keeps history/settings/result
+  alive across collapse; special-use FGS + foreground-only start are the
+  documented answer to Android 12/14 service restrictions (spec §7).
+- **Full detail + device checklist:** `brain/AI_SIDEBAR.md`.
+
 ## Spec §13 open-decision coverage
 
 | Spec decision | ADR | Status |

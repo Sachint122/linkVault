@@ -33,6 +33,7 @@ task requires.
 | `IMPLEMENTATION_PLAN.md` | Phase plan, tasks, exit criteria, risks | Planning / status reporting |
 | `TESTING_STRATEGY.md` | Test layers, critical cases, tools | Writing or running tests |
 | `AI_CONTEXT.md` | AI working rules for this repo | Session start (thin pointer here) |
+| `brain/AI_SIDEBAR.md` | AI Sidebar architecture, restrictions, test checklist (D-20) | Sidebar/overlay/FGS work |
 | `LINKVAULT_MASTER_GOAL.md` | Authoritative product spec (read-only source of truth) | Only when a requirement is ambiguous |
 
 ## Hard rules (from product spec, never violate)

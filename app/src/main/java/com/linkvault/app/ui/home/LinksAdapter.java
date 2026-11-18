@@ -158,9 +158,13 @@ public class LinksAdapter extends RecyclerView.Adapter<LinksAdapter.Holder> {
             h.summary.setVisibility(View.GONE);
         }
 
-        // Type icon
+        // Type icon (github.com gets official Octocat logo as per design reference)
         if (item.isLink()) {
-            h.typeIcon.setImageResource(R.drawable.ic_link);
+            if (item.getSubtitle() != null && item.getSubtitle().contains("github.com")) {
+                h.typeIcon.setImageResource(R.drawable.ic_github);
+            } else {
+                h.typeIcon.setImageResource(R.drawable.ic_link);
+            }
         } else {
             h.typeIcon.setImageResource(R.drawable.ic_file);
         }
@@ -168,41 +172,80 @@ public class LinksAdapter extends RecyclerView.Adapter<LinksAdapter.Holder> {
         // Pin icon (links only)
         h.pinIcon.setVisibility(item.isPinned() ? View.VISIBLE : View.GONE);
 
-        // Metadata: Category & Tags
+        // Category Badge
+        if (h.metaCategory != null) {
+            String catName = categoryNames.get(item.getCategoryId());
+            h.metaCategory.setText(catName != null && !catName.isEmpty() ? "📁 " + catName : "📁 Uncategorized");
+            h.metaCategory.setVisibility(View.VISIBLE);
+        }
+
+        // Tag Badges
+        List<String> tags = item.getTags();
+        if (h.metaTag != null) {
+            if (tags != null && !tags.isEmpty()) {
+                h.metaTag.setText("#" + tags.get(0));
+                h.metaTag.setVisibility(View.VISIBLE);
+                if (tags.size() > 1 && h.metaMoreTags != null) {
+                    h.metaMoreTags.setText("+" + (tags.size() - 1));
+                    h.metaMoreTags.setVisibility(View.VISIBLE);
+                } else if (h.metaMoreTags != null) {
+                    h.metaMoreTags.setVisibility(View.GONE);
+                }
+            } else {
+                h.metaTag.setVisibility(View.GONE);
+                if (h.metaMoreTags != null) h.metaMoreTags.setVisibility(View.GONE);
+            }
+        }
+
+        // Dead-link check badge (only after a manual check)
+        if (h.metaStatus != null) {
+            if (item.isLink() && item.getLink() != null && item.getLink().getCheckedAt() != null) {
+                int status = item.getLink().getHttpStatus();
+                String badge;
+                if (status == com.linkvault.app.domain.DeadLinkChecker.NETWORK_FAIL) {
+                    badge = h.itemView.getContext().getString(R.string.meta_offline);
+                    h.metaStatus.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.cyber_amber));
+                } else if (status >= 400) {
+                    badge = h.itemView.getContext().getString(R.string.meta_dead, status);
+                    h.metaStatus.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.cyber_error));
+                } else {
+                    badge = "✓ live";
+                    h.metaStatus.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.cyber_emerald));
+                }
+                h.metaStatus.setText(badge);
+                h.metaStatus.setVisibility(View.VISIBLE);
+            } else {
+                h.metaStatus.setVisibility(View.GONE);
+            }
+        }
+
+        // Legacy fallback meta text
         StringBuilder meta = new StringBuilder();
         String catName = categoryNames.get(item.getCategoryId());
         if (catName != null) meta.append(catName);
-
-        List<String> tags = item.getTags();
         if (tags != null && !tags.isEmpty()) {
             if (meta.length() > 0) meta.append("  ·  ");
             meta.append("#").append(tags.get(0));
             if (tags.size() > 1) meta.append(" +").append(tags.size() - 1);
         }
-
-        // Dead-link check badge (only after a manual check).
-        if (item.isLink() && item.getLink() != null
-                && item.getLink().getCheckedAt() != null) {
-            int status = item.getLink().getHttpStatus();
-            String badge;
-            if (status == com.linkvault.app.domain.DeadLinkChecker.NETWORK_FAIL) {
-                badge = h.itemView.getContext().getString(R.string.meta_offline);
-            } else if (status >= 400) {
-                badge = h.itemView.getContext().getString(R.string.meta_dead, status);
-            } else {
-                badge = h.itemView.getContext().getString(R.string.meta_live);
-            }
-            if (meta.length() > 0) meta.append("  ·  ");
-            meta.append(badge);
+        if (h.meta != null) {
+            h.meta.setText(meta.toString());
         }
-
-        h.meta.setText(meta.toString());
-        h.meta.setVisibility(meta.length() > 0 ? View.VISIBLE : View.GONE);
 
         // Selection highlight
         h.itemView.setBackgroundColor(selected
                 ? ContextCompat.getColor(h.itemView.getContext(), R.color.cyber_surface)
                 : Color.TRANSPARENT);
+
+        if (h.itemChevron != null) {
+            h.itemChevron.setOnClickListener(v -> {
+                if (h.summary != null && h.summary.getVisibility() == View.VISIBLE) {
+                    h.summary.setMaxLines(h.summary.getMaxLines() == 2 ? 8 : 2);
+                } else if (listener != null) {
+                    listener.onItemClicked(item);
+                }
+            });
+        }
 
         h.itemView.setOnClickListener(v -> {
             if (isSelectionMode()) {
@@ -231,7 +274,12 @@ public class LinksAdapter extends RecyclerView.Adapter<LinksAdapter.Holder> {
         final TextView url;
         final TextView summary;
         final TextView meta;
+        final TextView metaCategory;
+        final TextView metaTag;
+        final TextView metaMoreTags;
+        final TextView metaStatus;
         final ImageView pinIcon;
+        final View itemChevron;
         final View moreButton;
 
         Holder(@NonNull View itemView) {
@@ -241,7 +289,12 @@ public class LinksAdapter extends RecyclerView.Adapter<LinksAdapter.Holder> {
             url = itemView.findViewById(R.id.itemUrl);
             summary = itemView.findViewById(R.id.itemSummary);
             meta = itemView.findViewById(R.id.itemMeta);
+            metaCategory = itemView.findViewById(R.id.metaCategory);
+            metaTag = itemView.findViewById(R.id.metaTag);
+            metaMoreTags = itemView.findViewById(R.id.metaMoreTags);
+            metaStatus = itemView.findViewById(R.id.metaStatus);
             pinIcon = itemView.findViewById(R.id.pinIcon);
+            itemChevron = itemView.findViewById(R.id.itemChevron);
             moreButton = itemView.findViewById(R.id.moreButton);
         }
     }

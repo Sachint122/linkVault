@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Corner Radii -->
+    <dimen name="radius_window">28dp</dimen>
+    <dimen name="radius_card">16dp</dimen>
+    <dimen name="radius_pill">24dp</dimen>
+    <dimen name="radius_btn_compact">12dp</dimen>
+    <dimen name="radius_badge">8dp</dimen>
+    <dimen name="radius_icon_container">12dp</dimen>
+    <dimen name="radius_fab">18dp</dimen>
+
+    <!-- Spacing -->
+    <dimen name="spacing_2xs">2dp</dimen>
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">12dp</dimen>
+    <dimen name="spacing_lg">16dp</dimen>
+    <dimen name="spacing_xl">20dp</dimen>
+
+    <!-- Strokes -->
+    <dimen name="stroke_thin">1dp</dimen>
+    <dimen name="stroke_highlight">1.2dp</dimen>
+
+    <!-- Heights -->
+    <dimen name="search_bar_height">48dp</dimen>
+    <dimen name="cta_button_height">46dp</dimen>
+    <dimen name="action_tile_height">52dp</dimen>
+    <dimen name="bottom_nav_height">58dp</dimen>
+</resources>

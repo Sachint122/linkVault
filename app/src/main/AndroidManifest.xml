@@ -4,6 +4,15 @@
     <!-- Dead-link check (D-14): user-initiated only, no background calls. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- AI Sidebar (spec §2): floating overlay + specialUse foreground service.
+         SYSTEM_ALERT_WINDOW is granted via Settings (ACTION_MANAGE_OVERLAY_PERMISSION);
+         VIBRATE covers the spec §10 haptic feedback toggle. No POST_NOTIFICATIONS —
+         the FGS notification is exempt and no result notifications exist. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -63,6 +72,17 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_linkvault_info" />
         </receiver>
+
+        <!-- AI Sidebar overlay host (spec §2/§7). specialUse FGS subtyped as a
+             user-initiated in-app writing assistant (Android 14+ requirement). -->
+        <service
+            android:name=".sidebar.SidebarService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="User-initiated writing assistant overlay: rewrites text the user pasted into LinkVault while the AI Sidebar is open." />
+        </service>
     </application>
 
 </manifest>
