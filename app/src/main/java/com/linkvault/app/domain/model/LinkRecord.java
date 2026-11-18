@@ -1,5 +1,7 @@
 package com.linkvault.app.domain.model;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +25,10 @@ public final class LinkRecord {
     private final boolean pinned;
     private final String createdAt;
     private final String updatedAt;
+    /** ISO time of the last manual dead-link check; null = never checked. */
+    @Nullable private final String checkedAt;
+    /** HTTP status from the last check: 0 = unset, -1 = unreachable, else code. */
+    private final int httpStatus;
 
     public LinkRecord(
             int schemaVersion,
@@ -38,6 +44,26 @@ public final class LinkRecord {
             boolean pinned,
             String createdAt,
             String updatedAt) {
+        this(schemaVersion, id, title, url, description, categoryId, sourceAppName,
+                sourcePackageName, imageUrl, tags, pinned, createdAt, updatedAt, null, 0);
+    }
+
+    public LinkRecord(
+            int schemaVersion,
+            String id,
+            String title,
+            String url,
+            String description,
+            String categoryId,
+            String sourceAppName,
+            String sourcePackageName,
+            String imageUrl,
+            List<String> tags,
+            boolean pinned,
+            String createdAt,
+            String updatedAt,
+            @Nullable String checkedAt,
+            int httpStatus) {
         this.schemaVersion = schemaVersion;
         this.id = id;
         this.title = title;
@@ -51,6 +77,8 @@ public final class LinkRecord {
         this.pinned = pinned;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.checkedAt = checkedAt;
+        this.httpStatus = httpStatus;
     }
 
     public static LinkRecord create(
@@ -63,32 +91,45 @@ public final class LinkRecord {
 
     public LinkRecord withUpdatedAt(String nowIso) {
         return new LinkRecord(schemaVersion, id, title, url, description, categoryId,
-                sourceAppName, sourcePackageName, imageUrl, tags, pinned, createdAt, nowIso);
+                sourceAppName, sourcePackageName, imageUrl, tags, pinned, createdAt, nowIso,
+                checkedAt, httpStatus);
     }
 
     public LinkRecord withTitle(String newTitle) {
         return new LinkRecord(schemaVersion, id, newTitle, url, description, categoryId,
-                sourceAppName, sourcePackageName, imageUrl, tags, pinned, createdAt, updatedAt);
+                sourceAppName, sourcePackageName, imageUrl, tags, pinned, createdAt, updatedAt,
+                checkedAt, httpStatus);
     }
 
     public LinkRecord withDescription(String newDescription) {
         return new LinkRecord(schemaVersion, id, title, url, newDescription, categoryId,
-                sourceAppName, sourcePackageName, imageUrl, tags, pinned, createdAt, updatedAt);
+                sourceAppName, sourcePackageName, imageUrl, tags, pinned, createdAt, updatedAt,
+                checkedAt, httpStatus);
     }
 
     public LinkRecord withCategoryId(String newCategoryId) {
         return new LinkRecord(schemaVersion, id, title, url, description, newCategoryId,
-                sourceAppName, sourcePackageName, imageUrl, tags, pinned, createdAt, updatedAt);
+                sourceAppName, sourcePackageName, imageUrl, tags, pinned, createdAt, updatedAt,
+                checkedAt, httpStatus);
     }
 
     public LinkRecord withTags(List<String> newTags) {
         return new LinkRecord(schemaVersion, id, title, url, description, categoryId,
-                sourceAppName, sourcePackageName, imageUrl, newTags, pinned, createdAt, updatedAt);
+                sourceAppName, sourcePackageName, imageUrl, newTags, pinned, createdAt, updatedAt,
+                checkedAt, httpStatus);
     }
 
     public LinkRecord withPinned(boolean newPinned) {
         return new LinkRecord(schemaVersion, id, title, url, description, categoryId,
-                sourceAppName, sourcePackageName, imageUrl, tags, newPinned, createdAt, updatedAt);
+                sourceAppName, sourcePackageName, imageUrl, tags, newPinned, createdAt, updatedAt,
+                checkedAt, httpStatus);
+    }
+
+    /** Records a dead-link check result. Does NOT bump updatedAt (not a content edit). */
+    public LinkRecord withCheck(String checkedAtIso, int status) {
+        return new LinkRecord(schemaVersion, id, title, url, description, categoryId,
+                sourceAppName, sourcePackageName, imageUrl, tags, pinned, createdAt, updatedAt,
+                checkedAtIso, status);
     }
 
     public int getSchemaVersion() { return schemaVersion; }
@@ -104,6 +145,8 @@ public final class LinkRecord {
     public boolean isPinned() { return pinned; }
     public String getCreatedAt() { return createdAt; }
     public String getUpdatedAt() { return updatedAt; }
+    @Nullable public String getCheckedAt() { return checkedAt; }
+    public int getHttpStatus() { return httpStatus; }
 
     /** Fallback title from the URL host when no title was provided. */
     public static String fallbackTitle(String url) {

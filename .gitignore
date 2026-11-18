@@ -26,3 +26,4 @@ Thumbs.db
 *.jks
 *.keystore
 lv_ui.xml
+keystore.properties

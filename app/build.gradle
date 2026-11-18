@@ -2,6 +2,13 @@ plugins {
     id 'com.android.application'
 }
 
+// Release signing — filled from keystore.properties (gitignored).
+def kprops = new Properties()
+def kfile = file("keystore.properties")
+if (kfile.exists()) {
+    kfile.withInputStream { kprops.load(it) }
+}
+
 android {
     namespace 'com.linkvault.app'
     compileSdk 35
@@ -15,10 +22,25 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            if (kfile.exists()) {
+                storeFile file(kprops['storeFile'])
+                storePassword kprops['storePassword']
+                keyAlias kprops['keyAlias']
+                keyPassword kprops['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled true
+            // minify off until release build is device-verified by owner.
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (kfile.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
         debug {
             minifyEnabled false

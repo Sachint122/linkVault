@@ -2,6 +2,82 @@
 
 Format: date — change — impact. Newest first.
 
+## 2026-11-18 (app-lock removed, optimistic delete, UI polish)
+
+- **App lock (B6) fully removed** per owner decision — deleted
+  `LockFragment`, `fragment_lock.xml`, `AppLockManager`,
+  `MainActivity.onStart/onStop` gate, Settings PIN card + set-PIN dialog,
+  `appLock()` from AppContainer, `androidx.biometric` dependency, nav
+  destination. Lock screen UI served as the design reference for the
+  polish pass below.
+- **Optimistic delete + animation:** `delete`/`deleteAll`/`restore` update
+  the in-memory index + list instantly (DiffUtil + DefaultItemAnimator
+  remove/add animation), then persist in background; rollback + toast on
+  failure. New `IndexRepository.removeItem/addItem/persistCache` (single
+  file write; index marked dirty if the write fails).
+- **Home refresh bug fixed:** after save, a new item could land above the
+  viewport (RecyclerView kept pixel offset on position-0 insert) — the
+  list observer now snaps to top when the user was at top
+  (`scrollToPosition(0)`).
+- **meta_dead badge fix:** `LinksAdapter` called `getString(meta_dead)`
+  without the status arg (rendered literal `%1$d`); now formats the HTTP
+  status (e.g. `404`).
+- **UI polish (lock-screen reference):** subtle `bg_cyber_vault` wallpaper
+  on Settings/Save/Onboarding/Categories; cyan section titles; cyber cards
+  (surface_card + border + 16dp radius) on Settings/Onboarding and
+  category rows; onboarding logo; Categories FAB in cyan.
+- Debug `LV` logs stripped; `releases/linkVault-debug.apk` refreshed;
+  build green (`assembleDebug testDebugUnitTest` EXIT=0, 58/58).
+
+## 2026-11-17 (feature push: batches 1–10, compile-verified)
+
+All batches green (`assembleDebug testDebugUnitTest` EXIT=0, 58/58 tests).
+Owner will device-test each feature before GitHub push (per owner directive:
+agent writes code + test guide only).
+
+- **B1 Clipboard detect:** `maybeOfferClipboardSave()` on Home resume —
+  offers save when clipboard holds a URL; `last_copied_url` written to
+  `lv_prefs`; share intent detected via `isShareAction()`. INTERNET permission
+  added (needed by dead-link check).
+- **B1 Release signing:** `linkvault-release.jks` + `app/keystore.properties`
+  (gitignored), `signingConfigs.release` wired; minifyEnabled stays false.
+- **B2 Dead-link check:** `domain/DeadLinkChecker` (HEAD/GET, 5s timeout,
+  status capture), `LinkRecord` extended (15-arg ctor, `withCheck`,
+  `checkedAt`/`httpStatus`), `RecordRepository.update()/markChecked`,
+  `IndexRepository.replaceItem`, HomeViewModel `checkLink`, row-menu item +
+  adapter status badges, Settings **Check all links** button with progress.
+- **B3 Search extras:** tag filter chips (`currentTagFilter`, `allTags`,
+  `setTagFilter`), recent-searches dropdown (AutoCompleteTextView, JSON list
+  capped at 10 in `lv_prefs`), saved on `onPause`.
+- **B4 Auto-categorize rules:** `AutoRule` + `AutoCatCodec` +
+  `AutoCatRepository` (lazy `user/autorules.json`, max 200, domain→category,
+  `matchFor` applies on create when folder = Uncategorized); Settings UI
+  (rule list, add-rule 2-step dialog, delete-rule dialog).
+- **B5 Export CSV/text:** `exportCsv`/`exportText` (proper CSV escaping),
+  `CreateDocument` launchers, Settings Export card. Multi-select: long-press
+  enters selection mode, `selectionBar` (share/delete/cancel), FAB hides,
+  `HomeViewModel.deleteAll` single-pass delete.
+- **B6 App lock:** `AppLockManager` (salted SHA-256 PIN in `lv_prefs`,
+  in-memory session unlock), `fragment_lock` + `LockFragment` (PIN + biometric
+  via `androidx.biometric:1.1.0`, back blocked), gate in `MainActivity.onStart`
+  (covers return-from-share), relock in `onStop`, Settings lock card +
+  set-PIN dialog (4–12 digits).
+- **B7 Auto backup:** `AutoBackupWorker` (WorkManager, daily, self-gates on
+  `auto_backup_enabled` pref, writes `backups/linkvault_auto_<ts>.zip`,
+  prunes newest 7, retry on failure), scheduled in `App.onCreate()` (unique
+  KEEP), Settings card (toggle + run-now + status).
+- **B8 Pagination:** HomeViewModel windowed rendering (initial 50, step 100,
+  `loadMore()`), RecyclerView scroll listener triggers at 5-from-end.
+- **B9 Nested subcategories:** `Category.parentId` (codec round-trip, schema
+  stays 1), `CategoryRepository.create(name, parentId)` depth ≤3 + delete
+  re-parents children, `IndexRepository.query` category filter → expanded id
+  set (self + descendants via `parentByChild`), DFS-ordered indented rows in
+  Categories screen, indented Home chips (`└ `), **Add subcategory** menu item.
+- **B10 Home widget:** `widget/LinkVaultWidgetProvider` — static 5-row layout
+  (`widget_linkvault.xml` + `@xml/widget_linkvault_info`), header opens app,
+  rows open URL in browser; `updateAll()` called from `HomeViewModel.refresh`
+  and `SaveLinkViewModel` save; manifest receiver registered.
+
 ## 2026-11-17 (fast app-open: index.json read-back)
 
 - **Problem:** app open took seconds — `IndexRepository` wrote `.index/index.json`

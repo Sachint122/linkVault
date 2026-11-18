@@ -27,6 +27,9 @@ public final class CategoryCodec {
                 o.put("updatedAt", c.getUpdatedAt());
                 o.put("sortOrder", c.getSortOrder());
                 o.put("system", c.isSystem());
+                if (c.getParentId() != null) {
+                    o.put("parentId", c.getParentId());
+                }
                 arr.put(o);
             }
             root.put("categories", arr);
@@ -84,7 +87,9 @@ public final class CategoryCodec {
             String updatedAt = parseTs(o, "updatedAt", relativePath, i);
             int sortOrder = o.optInt("sortOrder", i);
             boolean system = o.optBoolean("system", false);
-            out.add(new Category(id, name, createdAt, updatedAt, sortOrder, system));
+            String parentId = o.optString("parentId", null);
+            if (parentId != null && parentId.isEmpty()) parentId = null;
+            out.add(new Category(id, name, createdAt, updatedAt, sortOrder, system, parentId));
         }
         return out;
     }

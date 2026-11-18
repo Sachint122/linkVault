@@ -1,59 +1,56 @@
 # STATUS
 
 **Last updated:** 2026-11-17
-**Updated by:** AI session — fast load + CRUD list animations device-verified
+**Updated by:** AI session — feature batches 1–10 code complete, compile-verified
 
 ## Current phase
 
-**Phase 2 — Link capture & organization: ✅ COMPLETE**
-**List UX (fast load + live CRUD updates + item animations): ✅ COMPLETE & device-verified**
-Next: Phase 3 — Search & file support.
+**Phase 2: ✅ COMPLETE (device-verified)**
+**Phase 3 (search, index, files): ✅ COMPLETE (device-verified)**
+**Feature push batches 1–10: ✅ CODE COMPLETE, build green — awaiting owner device tests**
 
 ## Repository state
 
-- Phase 0 docs: complete (`brain/INDEX.md` file map).
-- Phase 1 & 2 code: **implemented & verified** — Gradle project (AGP 8.7.3, Gradle
-  wrapper 8.11.1, JDK 17), `app` module, Java 17, minSdk 26/targetSdk 35.
-- Build: `assembleDebug` OK; unit tests **pass**.
-- Real device `e893ddcf` (Realme RMX3660) fully tested via ADB.
-- Bug fixes during device testing:
-  1. Fixed `ClassCastException` in `LinksAdapter$Holder` (`AppCompatImageButton` cast to `MaterialButton` -> changed to `View`).
-  2. Fixed `fitsSystemWindows="true"` on root layout so toolbar insets below status bar.
-  3. Fixed `setSupportActionBar` + `NavigationUI.setupActionBarWithNavController` in `MainActivity` so action bar, back navigation, and overflow menu work.
+- Build: `assembleDebug testDebugUnitTest` **EXIT=0**; 58/58 unit tests pass.
+- Release signing configured (`keystore.properties` gitignored).
+- GitHub remote `Sachint122/linkVault` on `main` (last pushed commit covers
+  Phase 3 + fast-load work; **feature batches 1–10 NOT yet pushed** — per owner
+  directive, push happens after owner tests each feature).
+- Helper: `%TEMP%\opencode\lv_ui.ps1` (ADB UI dump/find/tap helpers).
 
-## Phase 2 exit-criteria evidence (2026-11-16, device `e893ddcf`, Realme RMX3660)
+## Feature batches — status
 
-| Criterion | Evidence |
-|---|---|
-| Share Intent capture | `ACTION_SEND` intent with URL received -> review/save screen displayed prefilled with title & URL. |
-| Review screen saving | Saved to SAF storage as JSON file: `/sdcard/Link/user/categories/cat_ungrouped/link_284e5180-...json`. Schema v1 verified. |
-| Home list rendering | Link displayed in RecyclerView with title, URL, category, and overflow menu without crash. |
-| Pin / unpin action | Pinned via menu -> star pin icon appeared in UI -> `"pinned": true` verified in JSON on disk. |
-| Category management | Created "Tech" category -> verified in `categories.json` on disk -> "Tech" chip rendered on Home. |
-| Move link | Moved link from "Uncategorized" to "Tech" -> physical JSON deleted from `cat_ungrouped` and created in `cat_15ef4f77-.../` -> UI updated to "Tech". |
-| Delete link with undo | Deleted link with dialog confirmation -> removed from disk (`total 0`) -> snackbar with "Undo" displayed. |
+| Batch | Feature | Code | Owner test |
+|---|---|---|---|
+| 1 | Clipboard offer + share detect + release signing | ✅ | ⬜ |
+| 2 | Dead-link check (single + check-all) | ✅ | ⬜ |
+| 3 | Tag filter chips + recent searches | ✅ | ⬜ |
+| 4 | Auto-categorize rules | ✅ | ⬜ |
+| 5 | Export CSV/text + multi-select share/delete | ✅ | ⬜ |
+| 6 | App lock (PIN + biometric) | ✅ | ⬜ |
+| 7 | Auto backup (daily, keep 7) | ✅ | ⬜ |
+| 8 | List pagination (50 + load-more) | ✅ | ⬜ |
+| 9 | Nested subcategories (depth 3) | ✅ | ⬜ |
+| 10 | Home-screen widget (5 recent links) | ✅ | ⬜ |
 
-## List UX evidence (2026-11-17, device `e893ddcf`)
-
-| Criterion | Evidence |
-|---|---|
-| Fast app open | `IndexRepository` reads persisted `index.json` v2 on cold start — **first paint 342ms** (device logcat tag `LV`); background verify rescan (1224ms) no longer blocks paint. |
-| Data shows on app open | Cold start -> Home RecyclerView rendered saved links (GitHub record) without manual refresh. |
-| Create updates list live | FAB -> Add Link -> typed `https://example.com/fast-test` -> Save -> back on Home, new `example.com` row visible immediately (DiffUtil insert). |
-| Delete updates list live | Row menu -> Delete -> confirm -> `example.com` row gone, remaining item intact (DiffUtil remove). |
-| Item animations | `LinksAdapter.submit()` now uses `DiffUtil` (was `notifyDataSetChanged`); `DefaultItemAnimator` durations set (add 220ms / remove 200ms / change 180ms / move 220ms). |
-| Fast open load | Removed duplicate first load (constructor + onResume both called `refresh()`); single load in `onResume` only. |
+⬜ = test guide delivered, waiting for owner report.
+After all tests pass → push to GitHub → Phase 4 planning.
 
 ## Done
 
 - [x] Phase 0: analysis, docs, brain folder, approved decisions.
 - [x] Phase 1: foundation & local JSON storage, SAF engine, codecs, repo.
-- [x] Phase 2: Share Intent, save/review screen, link CRUD UI, category screens, tags + pinned UI, overflow menu, on-device ADB verification.
+- [x] Phase 2: Share Intent, save/review, link CRUD, categories, tags+pinned — device-verified.
+- [x] Phase 3: search/sort, index.json fast open (first paint 342ms), file import, file actions — device-verified.
+- [x] Batches 1–10 code (this session) — build green, unit tests green.
 
 ## Next action
 
-Phase 3: Search & sorting, rebuildable index (`IndexRepository`), file import (`ACTION_OPEN_DOCUMENT` + `FileCopyWorker`), file metadata JSON, file actions.
+1. Owner runs per-feature test guide (`brain/TEST_GUIDE.md`).
+2. Fix anything that fails.
+3. Copy fresh APK to `releases/`, push all commits to GitHub.
+4. Phase 4 planning (per `IMPLEMENTATION_PLAN.md`).
 
 ## Blockers
 
-- None. Ready for Phase 3.
+- None. Waiting on owner device tests.

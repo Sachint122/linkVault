@@ -21,6 +21,7 @@ import com.linkvault.app.domain.model.RecordIssue;
 
 import java.io.OutputStream;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -54,15 +55,33 @@ public class SettingsViewModel extends AndroidViewModel {
         }
     }
 
+    public static final class AutoCatEntry {
+        public final String domain;
+        public final String categoryId;
+        public final String categoryName;
+
+        AutoCatEntry(String domain, String categoryId, String categoryName) {
+            this.domain = domain;
+            this.categoryId = categoryId;
+            this.categoryName = categoryName;
+        }
+    }
+
     private final App app;
     private final StoragePermissionManager pm;
     private final ExecutorService io = Executors.newSingleThreadExecutor();
+
+    private volatile List<Category> cachedCategories = List.of();
 
     private final MutableLiveData<UiState> state = new MutableLiveData<>();
     private final MutableLiveData<TestResult> selfTest = new MutableLiveData<>();
     private final MutableLiveData<String> issuesReport = new MutableLiveData<>();
     private final MutableLiveData<String> busy = new MutableLiveData<>();
     private final MutableLiveData<String> backupStatus = new MutableLiveData<>();
+    private final MutableLiveData<String> checkProgress = new MutableLiveData<>();
+    private final MutableLiveData<List<AutoCatEntry>> autoCatRules = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> autoBackupEnabled = new MutableLiveData<>();
+    private final MutableLiveData<String> autoBackupStatus = new MutableLiveData<>();
     private final MutableLiveData<RestoreEngine.RestorePreview> restorePreview = new MutableLiveData<>();
     private final MutableLiveData<RestoreEngine.RestoreResult> restoreResult = new MutableLiveData<>();
 
@@ -71,6 +90,47 @@ public class SettingsViewModel extends AndroidViewModel {
         this.app = (App) application;
         this.pm = app.getContainer().permissionManager();
         refresh();
+        loadAutoCatRules();
+        autoBackupEnabled.postValue(prefs().getBoolean(
+                com.linkvault.app.backup.AutoBackupWorker.KEY_ENABLED, false));
+        refreshAutoBackupStatus();
+    }
+
+    // ----------------------------------------------------------- Auto backup
+
+    private android.content.SharedPreferences prefs() {
+        return app.getSharedPreferences(
+                com.linkvault.app.backup.AutoBackupWorker.PREFS, android.content.Context.MODE_PRIVATE);
+    }
+
+    public void toggleAutoBackup(boolean enable) {
+        prefs().edit()
+                .putBoolean(com.linkvault.app.backup.AutoBackupWorker.KEY_ENABLED, enable)
+                .apply();
+        autoBackupEnabled.postValue(enable);
+        backupStatus.postValue(enable
+                ? "Auto backup ON — daily vault me backups/ folder me."
+                : "Auto backup OFF.");
+        refreshAutoBackupStatus();
+    }
+
+    public void runAutoBackupNow() {
+        androidx.work.OneTimeWorkRequest request =
+                new androidx.work.OneTimeWorkRequest.Builder(
+                        com.linkvault.app.backup.AutoBackupWorker.class).build();
+        androidx.work.WorkManager.getInstance(app).enqueue(request);
+        backupStatus.postValue("Auto backup shuru — thodi der me backups/ me dikhega.");
+    }
+
+    private void refreshAutoBackupStatus() {
+        long last = prefs().getLong(
+                com.linkvault.app.backup.AutoBackupWorker.KEY_LAST_RUN, 0);
+        autoBackupStatus.postValue(last == 0
+                ? "Abhi tak koi auto backup nahi."
+                : "Last backup: " + java.time.Instant.ofEpochMilli(last)
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .format(java.time.format.DateTimeFormatter
+                                .ofPattern("dd MMM yyyy, HH:mm")));
     }
 
     public LiveData<UiState> getState() { return state; }
@@ -78,6 +138,13 @@ public class SettingsViewModel extends AndroidViewModel {
     public LiveData<String> getIssuesReport() { return issuesReport; }
     public LiveData<String> getBusy() { return busy; }
     public LiveData<String> getBackupStatus() { return backupStatus; }
+    public LiveData<String> getCheckProgress() { return checkProgress; }
+    public LiveData<List<AutoCatEntry>> getAutoCatRules() { return autoCatRules; }
+    public LiveData<Boolean> getAutoBackupEnabled() { return autoBackupEnabled; }
+    public LiveData<String> getAutoBackupStatus() { return autoBackupStatus; }
+
+    /** Snapshot of categories for dialogs (loaded during loadAutoCatRules). */
+    public List<Category> categoriesSnapshot() { return cachedCategories; }
     public LiveData<RestoreEngine.RestorePreview> getRestorePreview() { return restorePreview; }
     public LiveData<RestoreEngine.RestoreResult> getRestoreResult() { return restoreResult; }
 
@@ -273,6 +340,153 @@ public class SettingsViewModel extends AndroidViewModel {
                 busy.postValue(null);
             }
         });
+    }
+
+    /** Batch dead-link check (D-14): user-initiated, sequential, shows progress. */
+    public void checkAllLinks() {
+        busy.postValue("checking");
+        io.execute(() -> {
+            try {
+                var records = app.getContainer().recordRepository();
+                List<LinkRecord> links = records.getAllLinks();
+                int total = links.size();
+                if (total == 0) {
+                    backupStatus.postValue("No links to check.");
+                    return;
+                }
+                int live = 0, dead = 0, offline = 0;
+                for (int i = 0; i < total; i++) {
+                    LinkRecord r = links.get(i);
+                    checkProgress.postValue("Checking " + (i + 1) + "/" + total + "…");
+                    int status = com.linkvault.app.domain.DeadLinkChecker.check(r.getUrl());
+                    records.markChecked(r.getId(), status);
+                    if (status == com.linkvault.app.domain.DeadLinkChecker.NETWORK_FAIL) offline++;
+                    else if (status >= 400) dead++;
+                    else live++;
+                }
+                app.getContainer().indexRepository().invalidate();
+                backupStatus.postValue("Link check done: " + live + " live, "
+                        + dead + " dead, " + offline + " unreachable.");
+            } catch (Exception e) {
+                backupStatus.postValue("Link check failed: " + e.getMessage());
+            } finally {
+                checkProgress.postValue(null);
+                busy.postValue(null);
+            }
+        });
+    }
+
+    // -------------------------------------------------- Auto-categorize rules
+
+    public void loadAutoCatRules() {
+        io.execute(() -> {
+            try {
+                var container = app.getContainer();
+                List<com.linkvault.app.domain.model.AutoRule> rules =
+                        container.autoCatRepository().getAll();
+                List<Category> cats = container.categoryRepository().getAll();
+                cachedCategories = cats;
+                java.util.Map<String, String> names = new java.util.HashMap<>();
+                for (Category c : cats) names.put(c.getId(), c.getName());
+                List<AutoCatEntry> out = new ArrayList<>();
+                for (var r : rules) {
+                    out.add(new AutoCatEntry(r.domain, r.categoryId,
+                            names.getOrDefault(r.categoryId, r.categoryId)));
+                }
+                autoCatRules.postValue(out);
+            } catch (Exception e) {
+                autoCatRules.postValue(new ArrayList<>());
+            }
+        });
+    }
+
+    public void addAutoCatRule(String domain, String categoryId) {
+        io.execute(() -> {
+            try {
+                app.getContainer().autoCatRepository().addRule(domain, categoryId);
+                backupStatus.postValue("Rule added: "
+                        + com.linkvault.app.data.repo.AutoCatRepository.normalizeDomain(domain));
+                loadAutoCatRules();
+            } catch (Exception e) {
+                backupStatus.postValue("Rule add failed: " + e.getMessage());
+            }
+        });
+    }
+
+    public void removeAutoCatRule(String domain) {
+        io.execute(() -> {
+            try {
+                app.getContainer().autoCatRepository().removeRule(domain);
+                backupStatus.postValue("Rule removed: " + domain);
+                loadAutoCatRules();
+            } catch (Exception e) {
+                backupStatus.postValue("Rule remove failed: " + e.getMessage());
+            }
+        });
+    }
+
+    // ------------------------------------------------------------- Export
+
+    public void exportCsv(Uri destinationUri) {
+        exportLinks(destinationUri, true);
+    }
+
+    public void exportText(Uri destinationUri) {
+        exportLinks(destinationUri, false);
+    }
+
+    private void exportLinks(Uri destinationUri, boolean csv) {
+        busy.postValue("exporting");
+        io.execute(() -> {
+            try {
+                var container = app.getContainer();
+                List<LinkRecord> links = container.recordRepository().getAllLinks();
+                List<Category> cats = container.categoryRepository().getAll();
+                java.util.Map<String, String> names = new java.util.HashMap<>();
+                for (Category c : cats) names.put(c.getId(), c.getName());
+
+                StringBuilder sb = new StringBuilder();
+                if (csv) sb.append("title,url,description,category,tags,createdAt\r\n");
+                for (LinkRecord r : links) {
+                    String cat = names.getOrDefault(r.getCategoryId(), r.getCategoryId());
+                    if (csv) {
+                        sb.append(csvField(r.getTitle())).append(',')
+                                .append(csvField(r.getUrl())).append(',')
+                                .append(csvField(r.getDescription() == null ? "" : r.getDescription())).append(',')
+                                .append(csvField(cat)).append(',')
+                                .append(csvField(String.join(";", r.getTags()))).append(',')
+                                .append(csvField(r.getCreatedAt())).append("\r\n");
+                    } else {
+                        sb.append(r.getTitle()).append('\n').append(r.getUrl());
+                        if (r.getDescription() != null && !r.getDescription().isEmpty()) {
+                            sb.append('\n').append(r.getDescription());
+                        }
+                        sb.append("  [").append(cat).append("]\n\n");
+                    }
+                }
+                try (OutputStream out = app.getContentResolver().openOutputStream(destinationUri)) {
+                    if (out == null) {
+                        throw new StorageException(StorageException.Reason.IO_ERROR,
+                                "Cannot open output stream");
+                    }
+                    out.write(sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                }
+                backupStatus.postValue((csv ? "CSV" : "Text") + " export done: "
+                        + links.size() + " links.");
+            } catch (Exception e) {
+                backupStatus.postValue("Export failed: " + e.getMessage());
+            } finally {
+                busy.postValue(null);
+            }
+        });
+    }
+
+    private static String csvField(String v) {
+        if (v == null) return "";
+        boolean quote = v.contains(",") || v.contains("\"")
+                || v.contains("\n") || v.contains("\r");
+        String esc = v.replace("\"", "\"\"");
+        return quote ? "\"" + esc + "\"" : esc;
     }
 
     @Override

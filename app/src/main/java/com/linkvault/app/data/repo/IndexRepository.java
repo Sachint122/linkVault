@@ -127,6 +127,44 @@ public class IndexRepository {
         dirtySinceScan = true;
     }
 
+    /** Replaces one cached item in place (e.g. after a link check). No-op if not loaded. */
+    public synchronized void replaceItem(VaultItem updated) {
+        if (!isLoaded || updated == null) return;
+        for (int i = 0; i < memoryCache.size(); i++) {
+            if (memoryCache.get(i).getId().equals(updated.getId())) {
+                memoryCache.set(i, updated);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Optimistic UI: drops one item from the loaded cache with no disk I/O,
+     * so the list can animate the removal before the delete is persisted.
+     * Returns false when the cache is not loaded (caller falls back to the
+     * classic invalidate + refresh path).
+     */
+    public synchronized boolean removeItem(String id) {
+        if (!isLoaded || id == null) return false;
+        return memoryCache.removeIf(it -> id.equals(it.getId()));
+    }
+
+    /** Optimistic rollback: puts an item back into the loaded cache. */
+    public synchronized boolean addItem(VaultItem item) {
+        if (!isLoaded || item == null) return false;
+        memoryCache.add(item);
+        return true;
+    }
+
+    /**
+     * Persists the current cache snapshot to .index/index.json without a
+     * rescan — makes an optimistic mutation durable (kill-safe) in one write.
+     */
+    public synchronized void persistCache() {
+        if (!isLoaded) return;
+        saveIndexCache(new ArrayList<>(memoryCache));
+    }
+
     /** One-shot: true if the last load was the fast index.json path. */
     public synchronized boolean consumeColdVerify() {
         boolean v = coldVerifyPending;
@@ -136,10 +174,12 @@ public class IndexRepository {
 
     /**
      * Multi-token search with filters and sorting.
+     * {@code categoryIds} = expanded filter (selected category + descendants);
+     * null/empty = all categories.
      */
     public synchronized List<VaultItem> query(
             @Nullable String textQuery,
-            @Nullable String categoryId,
+            @Nullable java.util.Set<String> categoryIds,
             @Nullable VaultItem.ItemType typeFilter,
             SortOrder sortOrder,
             @Nullable Map<String, String> categoryNames) {
@@ -157,11 +197,16 @@ public class IndexRepository {
                 continue;
             }
 
-            // Category filter
-            if (categoryId != null && !categoryId.isEmpty() && !categoryId.equalsIgnoreCase("all")) {
-                if (!categoryId.equals(item.getCategoryId())) {
-                    continue;
+            // Category filter (self + descendants)
+            if (categoryIds != null && !categoryIds.isEmpty()) {
+                boolean inSet = false;
+                for (String id : categoryIds) {
+                    if (id.equalsIgnoreCase(item.getCategoryId())) {
+                        inSet = true;
+                        break;
+                    }
                 }
+                if (!inSet) continue;
             }
 
             // Query match
@@ -287,7 +332,9 @@ public class IndexRepository {
                 new JSONObject(s);
             });
         } catch (Exception ignored) {
-            // Index write failure is non-fatal: JSON records remain source of truth (D-05)
+            // Index write failure is non-fatal: JSON records remain source of
+            // truth (D-05). Flag dirty so the next load rescans and heals.
+            dirtySinceScan = true;
         }
     }
 }

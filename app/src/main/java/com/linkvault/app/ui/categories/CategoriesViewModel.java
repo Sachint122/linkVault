@@ -28,9 +28,12 @@ public class CategoriesViewModel extends AndroidViewModel {
     public static final class Row {
         public final Category category;
         public final int linkCount;
-        Row(Category category, int linkCount) {
+        /** 1 = root, 2+ = nested subcategory. */
+        public final int depth;
+        Row(Category category, int linkCount, int depth) {
             this.category = category;
             this.linkCount = linkCount;
+            this.depth = depth;
         }
     }
 
@@ -67,9 +70,7 @@ public class CategoriesViewModel extends AndroidViewModel {
                 List<Category> cats = container.categoryRepository().getAll();
                 var records = container.recordRepository();
                 List<Row> out = new ArrayList<>();
-                for (Category c : cats) {
-                    out.add(new Row(c, records.countIn(c.getId())));
-                }
+                emitRows(cats, null, 1, records, out);
                 rows.postValue(out);
             } catch (StorageException e) {
                 toast.postValue(new Event(e.getMessage() == null
@@ -78,10 +79,28 @@ public class CategoriesViewModel extends AndroidViewModel {
         });
     }
 
+    /** Depth-first: every parent appears directly above its children. */
+    private static void emitRows(List<Category> cats, String parentId, int depth,
+                                 com.linkvault.app.data.repo.RecordRepository records,
+                                 List<Row> out) {
+        for (Category c : cats) {
+            String p = c.getParentId();
+            boolean isChild = parentId != null ? parentId.equals(p) : p == null;
+            if (isChild) {
+                out.add(new Row(c, records.countIn(c.getId()), depth));
+                emitRows(cats, c.getId(), depth + 1, records, out);
+            }
+        }
+    }
+
     public void create(String name) {
+        create(name, null);
+    }
+
+    public void create(String name, @Nullable String parentId) {
         io.execute(() -> {
             try {
-                app.getContainer().categoryRepository().create(name);
+                app.getContainer().categoryRepository().create(name, parentId);
                 toast.postValue(new Event(getApplication().getString(R.string.category_created)));
                 refresh();
             } catch (StorageException e) {

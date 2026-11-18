@@ -69,7 +69,7 @@
                     app:tint="@color/cyber_cyan"
                     android:contentDescription="@null" />
 
-                <EditText
+                <AutoCompleteTextView
                     android:id="@+id/searchInput"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -82,6 +82,7 @@
                     android:textColor="@color/cyber_text_primary"
                     android:imeOptions="actionSearch"
                     android:inputType="text"
+                    android:completionThreshold="1"
                     android:maxLines="1"
                     android:textAppearance="?attr/textAppearanceBodyMedium" />
 
@@ -150,7 +151,7 @@
             android:layout_height="wrap_content"
             android:scrollbars="none"
             android:paddingTop="2dp"
-            android:paddingBottom="6dp">
+            android:paddingBottom="2dp">
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/categoryChipGroup"
@@ -158,6 +159,24 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="14dp"
                 android:paddingEnd="14dp"
+                app:singleLine="true"
+                app:singleSelection="true" />
+        </HorizontalScrollView>
+
+        <!-- Tag chips row (shown only when items have tags) -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingBottom="6dp">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/tagChipGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:visibility="gone"
                 app:singleLine="true"
                 app:singleSelection="true" />
         </HorizontalScrollView>
@@ -203,6 +222,46 @@
                     android:text="@string/list_empty"
                     android:textAppearance="?attr/textAppearanceBodyLarge"
                     android:textColor="@color/cyber_text_secondary" />
+            </LinearLayout>
+
+            <!-- Multi-select action bar (long-press mode) -->
+            <LinearLayout
+                android:id="@+id/selectionBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginStart="14dp"
+                android:layout_marginEnd="14dp"
+                android:layout_marginBottom="84dp"
+                android:elevation="6dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/shareSelectedButton"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:text="@string/selection_share" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/deleteSelectedButton"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:text="@string/selection_delete" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/cancelSelectionButton"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/selection_cancel" />
             </LinearLayout>
         </FrameLayout>
     </LinearLayout>

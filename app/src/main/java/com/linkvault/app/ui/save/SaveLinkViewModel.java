@@ -157,17 +157,24 @@ public class SaveLinkViewModel extends AndroidViewModel {
                             Instant.now().toString());
                     repo.update(updated);
                 } else {
+                    // Auto-categorize rule wins when the user picked no folder.
+                    String cat = finalCategory;
+                    if (Category.UNGROUPED_ID.equals(cat)) {
+                        String ruled = app.getContainer().autoCatRepository().matchFor(finalUrl);
+                        if (ruled != null) cat = ruled;
+                    }
                     LinkRecord rec = LinkRecord.create(
                             UUID.randomUUID().toString(),
                             finalTitle, finalUrl,
                             (description == null || description.trim().isEmpty())
                                     ? null : description.trim(),
-                            finalCategory,
+                            cat,
                             sourceAppName, sourcePackage, null,
                             tags, pinned, Instant.now().toString());
                     repo.create(rec);
                 }
                 app.getContainer().indexRepository().invalidate();
+                com.linkvault.app.widget.LinkVaultWidgetProvider.updateAll(app);
                 saved.postValue(new Event<>(true));
             } catch (StorageException e) {
                 error.postValue(new Event(e.getMessage() == null ? "save failed" : e.getMessage()));

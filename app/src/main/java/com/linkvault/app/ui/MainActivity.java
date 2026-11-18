@@ -68,9 +68,14 @@ public class MainActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             // First run without folder: navigate to onboarding
-            if (container().permissionManager().getAccessState()
-                    != StoragePermissionManager.AccessState.GRANTED) {
+            boolean needOnboarding = container().permissionManager().getAccessState()
+                    != StoragePermissionManager.AccessState.GRANTED;
+            if (needOnboarding) {
                 navController.navigate(R.id.onboardingFragment);
+            } else if (!isShareAction(getIntent())) {
+                // Clipboard read needs window focus (Android 10+) — defer to
+                // onWindowFocusChanged; onCreate is too early (returns null).
+                clipboardEligible = true;
             }
             handleShareIntent(getIntent());
         }
@@ -79,6 +84,69 @@ public class MainActivity extends AppCompatActivity {
                 == StoragePermissionManager.AccessState.GRANTED) {
             consumePendingShare();
         }
+    }
+
+    /** Set in onCreate when a normal (non-share) start may offer clipboard. */
+    private volatile boolean clipboardEligible = false;
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus && clipboardEligible) {
+            clipboardEligible = false;
+            maybeOfferClipboardSave();
+        }
+    }
+
+    /** One offer per process — avoids nagging on every resume. */
+    private static volatile boolean clipboardOffered = false;
+
+    /**
+     * Clipboard detect: if the clipboard holds a URL when the app opens
+     * normally, offer a one-tap save to the review screen.
+     */
+    private void maybeOfferClipboardSave() {
+        if (clipboardOffered) return;
+        try {
+            android.content.ClipboardManager cm =
+                    (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            if (cm == null || !cm.hasPrimaryClip()) return;
+            android.content.ClipData cd = cm.getPrimaryClip();
+            if (cd == null || cd.getItemCount() == 0) return;
+            CharSequence text = cd.getItemAt(0).coerceToText(this);
+            if (text == null) return;
+
+            ShareIntentParser.SharePayload payload =
+                    ShareIntentParser.parse(text.toString(), null, null);
+            if (!payload.hasUrl()) return;
+            String url = payload.singleUrl();
+
+            // Apna hi copy kiya hua URL na dobara offer karein.
+            String lastCopied = getSharedPreferences("lv_prefs", MODE_PRIVATE)
+                    .getString("last_copied_url", null);
+            if (url.equals(lastCopied)) return;
+
+            clipboardOffered = true;
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                    .setTitle("Clipboard me URL mila")
+                    .setMessage(url)
+                    .setPositiveButton("Save karein", (d, w) -> {
+                        if (navController == null) return;
+                        Bundle args = new Bundle();
+                        args.putString(SaveLinkFragment.ARG_URL, url);
+                        navController.navigate(R.id.saveLinkFragment, args);
+                    })
+                    .setNegativeButton("Ignore", null)
+                    .show();
+        } catch (Exception ignored) {
+            // Clipboard read blocked (e.g. secure input) — silently skip.
+        }
+    }
+
+    private static boolean isShareAction(@Nullable Intent intent) {
+        if (intent == null) return false;
+        String a = intent.getAction();
+        return Intent.ACTION_SEND.equals(a) || Intent.ACTION_SEND_MULTIPLE.equals(a);
     }
 
     @Override

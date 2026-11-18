@@ -5,6 +5,15 @@
     android:layout_height="match_parent"
     android:background="@color/cyber_bg">
 
+    <!-- Subtle Futuristic Wallpaper Background with Low Opacity -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/bg_cyber_vault"
+        android:scaleType="centerCrop"
+        android:alpha="0.22"
+        android:contentDescription="@null" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -34,6 +43,9 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
         android:contentDescription="@string/category_new_title"
+        app:backgroundTint="@color/cyber_cyan"
+        app:tint="@color/cyber_bg"
+        app:elevation="6dp"
         app:srcCompat="@android:drawable/ic_input_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

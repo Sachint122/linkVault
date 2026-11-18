@@ -4,9 +4,11 @@ import android.content.Context;
 
 import com.linkvault.app.data.backup.BackupEngine;
 import com.linkvault.app.data.backup.RestoreEngine;
+import com.linkvault.app.data.json.AutoCatCodec;
 import com.linkvault.app.data.json.CategoryCodec;
 import com.linkvault.app.data.json.FileCodec;
 import com.linkvault.app.data.json.LinkCodec;
+import com.linkvault.app.data.repo.AutoCatRepository;
 import com.linkvault.app.data.repo.CategoryRepository;
 import com.linkvault.app.data.repo.FileRepository;
 import com.linkvault.app.data.repo.IndexRepository;
@@ -26,6 +28,7 @@ public class AppContainer {
     private final LinkCodec linkCodec = new LinkCodec();
     private final CategoryCodec categoryCodec = new CategoryCodec();
     private final FileCodec fileCodec = new FileCodec();
+    private final AutoCatCodec autoCatCodec = new AutoCatCodec();
 
     private volatile DocumentTreeClient treeClient;
     private volatile SafeWriteEngine writeEngine;
@@ -33,6 +36,7 @@ public class AppContainer {
     private volatile RecordRepository recordRepository;
     private volatile FileRepository fileRepository;
     private volatile IndexRepository indexRepository;
+    private volatile AutoCatRepository autoCatRepository;
     private volatile BackupEngine backupEngine;
     private volatile RestoreEngine restoreEngine;
 
@@ -110,6 +114,13 @@ public class AppContainer {
         return indexRepository;
     }
 
+    public synchronized AutoCatRepository autoCatRepository() {
+        if (autoCatRepository == null) {
+            autoCatRepository = new AutoCatRepository(treeClient(), writeEngine(), autoCatCodec);
+        }
+        return autoCatRepository;
+    }
+
     public synchronized BackupEngine backupEngine() {
         if (backupEngine == null) {
             backupEngine = new BackupEngine(
@@ -136,6 +147,7 @@ public class AppContainer {
         recordRepository = null;
         fileRepository = null;
         indexRepository = null;
+        autoCatRepository = null;
         backupEngine = null;
         restoreEngine = null;
     }

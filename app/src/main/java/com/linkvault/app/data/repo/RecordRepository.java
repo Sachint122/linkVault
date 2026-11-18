@@ -100,7 +100,9 @@ public class RecordRepository {
                 record.getTags(),
                 record.isPinned(),
                 existing.getCreatedAt(),
-                now);
+                now,
+                existing.getCheckedAt(),
+                existing.getHttpStatus());
         // Same category → overwrite in place; different category → write new + delete old.
         String oldFolder = categories.folderFor(existing.getCategoryId());
         String newFolder = categories.folderFor(updated.getCategoryId());
@@ -111,6 +113,15 @@ public class RecordRepository {
             deleteFile(oldFolder, fileNameFor(updated.getId()));
         }
         return updated;
+    }
+
+    /** Persists a dead-link check result. Does not bump updatedAt. */
+    public synchronized LinkRecord markChecked(String recordId, int httpStatus)
+            throws StorageException {
+        LinkRecord existing = findById(recordId);
+        LinkRecord checked = existing.withCheck(nowIso(), httpStatus);
+        writeInto(categories.folderFor(existing.getCategoryId()), checked);
+        return checked;
     }
 
     public synchronized LinkRecord moveTo(String recordId, String newCategoryId)

@@ -28,6 +28,8 @@ public class CategoryRepository {
     static final String REL_DIR = "user/categories";
     static final String FILE_NAME = "categories.json";
     static final String REL_FILE = REL_DIR + "/" + FILE_NAME;
+    /** Root = depth 1; subcategories may nest up to 3 levels total. */
+    public static final int MAX_DEPTH = 3;
 
     private final DocumentTreeClient tree;
     private final SafeWriteEngine engine;
@@ -85,13 +87,38 @@ public class CategoryRepository {
     }
 
     public synchronized Category create(String rawName) throws StorageException {
+        return create(rawName, null);
+    }
+
+    /** Creates a category, optionally nested under {@code parentId} (max depth 3). */
+    public synchronized Category create(String rawName, @Nullable String parentId)
+            throws StorageException {
         String name = validateName(rawName, null);
         List<Category> all = new ArrayList<>(getAll());
+        if (parentId != null && !parentId.isEmpty()) {
+            Category parent = null;
+            for (Category c : all) {
+                if (c.getId().equals(parentId)) parent = c;
+            }
+            if (parent == null) {
+                throw new StorageException(StorageException.Reason.NOT_FOUND,
+                        "Parent category not found");
+            }
+            if (parent.getId().equals(Category.UNGROUPED_ID)) {
+                throw new StorageException(StorageException.Reason.INVALID_NAME,
+                        "Cannot nest under Uncategorized");
+            }
+            if (depthOf(all, parent.getId()) + 1 > MAX_DEPTH) {
+                throw new StorageException(StorageException.Reason.INVALID_NAME,
+                        "Max " + MAX_DEPTH + " levels deep");
+            }
+        }
         String id = "cat_" + UUID.randomUUID();
         String now = nowIso();
         int maxOrder = 0;
         for (Category c : all) maxOrder = Math.max(maxOrder, c.getSortOrder());
-        Category created = new Category(id, name, now, now, maxOrder + 1, false);
+        Category created = new Category(id, name, now, now, maxOrder + 1, false,
+                (parentId == null || parentId.isEmpty()) ? null : parentId);
         all.add(created);
         persist(all);
         return created;
@@ -121,8 +148,33 @@ public class CategoryRepository {
                     "System category cannot be deleted");
         }
         List<Category> all = new ArrayList<>(getAll());
+        // Re-parent children to the deleted category's parent (keep subtree intact).
+        for (Category c : all) {
+            if (id.equals(c.getParentId())) {
+                replaceIn(all, c.withParent(existing.getParentId(), nowIso()));
+            }
+        }
         all.removeIf(c -> c.getId().equals(id));
         persist(all);
+    }
+
+    /** Depth of a category (root = 1), walking the parentId chain. */
+    public static int depthOf(List<Category> all, String id) {
+        int depth = 1;
+        String cur = id;
+        for (int guard = 0; guard < 10; guard++) {
+            Category c = null;
+            for (Category x : all) {
+                if (x.getId().equals(cur)) {
+                    c = x;
+                    break;
+                }
+            }
+            if (c == null || c.getParentId() == null) break;
+            depth++;
+            cur = c.getParentId();
+        }
+        return depth;
     }
 
     /** Relative folder that holds this category's records (= its stable ID). */

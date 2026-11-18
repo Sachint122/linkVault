@@ -85,12 +85,24 @@
     <string name="undo">Undo</string>
     <string name="undone_toast">Wapas save ho gaya</string>
     <string name="move_done">Move ho gaya</string>
+    <string name="action_check_link">Link check karein</string>
+    <string name="checking_toast">Checking… %1$s/%2$s</string>
+    <string name="check_result_live">Live</string>
+    <string name="check_result_dead">Dead</string>
+    <string name="check_result_offline">Offline</string>
+    <string name="meta_live">✓ live</string>
+    <string name="meta_dead">✗ %1$d</string>
+    <string name="meta_offline">✗ offline</string>
+    <string name="selection_share">Share</string>
+    <string name="selection_delete">Delete</string>
+    <string name="selection_cancel">Cancel</string>
     <string name="open_failed">URL open nahi ho paya</string>
     <string name="menu_more">More actions</string>
 
     <!-- Categories screen -->
     <string name="categories_empty">Koi category nahi — + se banayein</string>
     <string name="category_new_title">Nayi category</string>
+    <string name="category_new_sub_title">Nayi subcategory</string>
     <string name="category_rename_title">Category rename karein</string>
     <string name="category_name_hint">Category naam (1-60 characters)</string>
     <string name="category_created">Category ban gayi</string>
@@ -103,4 +115,6 @@
     <string name="btn_move_and_delete">Move + Delete</string>
     <string name="category_count">%1$d link(s)</string>
     <string name="action_rename">Rename</string>
+    <string name="action_add_subcategory">Add subcategory</string>
+    <string name="widget_header">LinkVault</string>
 </resources>

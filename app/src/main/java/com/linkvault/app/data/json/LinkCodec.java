@@ -45,6 +45,11 @@ public final class LinkCodec {
             o.put("pinned", r.isPinned());
             o.put("createdAt", r.getCreatedAt());
             o.put("updatedAt", r.getUpdatedAt());
+            // Additive dead-link check fields — omitted when never checked.
+            if (r.getCheckedAt() != null) {
+                o.put("checkedAt", r.getCheckedAt());
+                o.put("httpStatus", r.getHttpStatus());
+            }
             return o.toString(2);
         } catch (JSONException e) {
             // Cannot happen with this shape; treat as programming error.
@@ -112,8 +117,21 @@ public final class LinkCodec {
         String createdAt = requireTimestamp(o, "createdAt", relativePath);
         String updatedAt = requireTimestamp(o, "updatedAt", relativePath);
 
+        String checkedAt = optNullableString(o, "checkedAt");
+        if (checkedAt != null) {
+            try {
+                Instant.parse(checkedAt);
+            } catch (Exception e) {
+                throw new MalformedRecordException(
+                        MalformedRecordException.Kind.SCHEMA_INVALID, relativePath,
+                        "'checkedAt' is not ISO-8601 UTC: " + checkedAt, e);
+            }
+        }
+        int httpStatus = o.optInt("httpStatus", 0);
+
         return new LinkRecord(schemaVersion, id, title, url, description, categoryId,
-                sourceAppName, sourcePackageName, imageUrl, tags, pinned, createdAt, updatedAt);
+                sourceAppName, sourcePackageName, imageUrl, tags, pinned, createdAt, updatedAt,
+                checkedAt, httpStatus);
     }
 
     private static List<String> parseTags(JSONObject o, String relativePath)

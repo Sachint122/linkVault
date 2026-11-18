@@ -47,7 +47,7 @@ public class CategoriesFragment extends Fragment {
         list.setAdapter(adapter);
 
         FloatingActionButton fab = view.findViewById(R.id.fabAddCategory);
-        fab.setOnClickListener(v -> showNameDialog(null));
+        fab.setOnClickListener(v -> showNameDialog(null, null));
 
         view.findViewById(R.id.emptyText).setVisibility(View.GONE);
 
@@ -66,7 +66,7 @@ public class CategoriesFragment extends Fragment {
         });
     }
 
-    private void showNameDialog(@Nullable Category existing) {
+    private void showNameDialog(@Nullable Category existing, @Nullable String parentId) {
         EditText input = new EditText(requireContext());
         input.setHint(R.string.category_name_hint);
         input.setMaxLines(1);
@@ -76,14 +76,18 @@ public class CategoriesFragment extends Fragment {
         wrapper.setPadding(pad, 0, pad, 0);
         wrapper.addView(input);
 
+        int title;
+        if (existing != null) title = R.string.category_rename_title;
+        else if (parentId != null) title = R.string.category_new_sub_title;
+        else title = R.string.category_new_title;
+
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(existing == null
-                        ? R.string.category_new_title : R.string.category_rename_title)
+                .setTitle(title)
                 .setView(wrapper)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     String name = input.getText() == null
                             ? "" : input.getText().toString();
-                    if (existing == null) viewModel.create(name);
+                    if (existing == null) viewModel.create(name, parentId);
                     else viewModel.rename(existing, name);
                 })
                 .setNegativeButton(R.string.btn_cancel, null)
@@ -123,7 +127,8 @@ public class CategoriesFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull Holder h, int position) {
             CategoriesViewModel.Row row = items.get(position);
-            h.name.setText(row.category.getName());
+            String indent = "\u00A0\u00A0".repeat(Math.max(0, row.depth - 1));
+            h.name.setText(indent + (row.depth > 1 ? "└ " : "") + row.category.getName());
             h.count.setText(getString(R.string.category_count, row.linkCount));
 
             h.itemView.setOnClickListener(v -> showRowMenu(row, v));
@@ -132,10 +137,17 @@ public class CategoriesFragment extends Fragment {
         private void showRowMenu(CategoriesViewModel.Row row, View anchor) {
             PopupMenu popup = new PopupMenu(requireContext(), anchor);
             popup.getMenu().add(0, 1, 0, R.string.action_rename);
-            popup.getMenu().add(0, 2, 1, R.string.action_delete);
+            if (row.depth < com.linkvault.app.data.repo.CategoryRepository.MAX_DEPTH) {
+                popup.getMenu().add(0, 3, 1, R.string.action_add_subcategory);
+            }
+            popup.getMenu().add(0, 2, 2, R.string.action_delete);
             popup.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == 1) {
-                    showNameDialog(row.category);
+                    showNameDialog(row.category, null);
+                    return true;
+                }
+                if (item.getItemId() == 3) {
+                    showNameDialog(null, row.category.getId());
                     return true;
                 }
                 if (item.getItemId() == 2) {

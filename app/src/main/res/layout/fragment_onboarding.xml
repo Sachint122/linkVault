@@ -1,10 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/cyber_bg"
-    android:fillViewport="true">
+    android:background="@color/cyber_bg">
+
+    <!-- Subtle Futuristic Wallpaper Background with Low Opacity -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/bg_cyber_vault"
+        android:scaleType="centerCrop"
+        android:alpha="0.22"
+        android:contentDescription="@null" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,25 +26,38 @@
         android:orientation="vertical"
         android:padding="24dp">
 
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_vault_logo" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="@string/onboarding_title"
-            android:textAppearance="?attr/textAppearanceHeadlineSmall" />
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textColor="@color/cyber_cyan" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:text="@string/onboarding_body"
-            android:textAppearance="?attr/textAppearanceBodyMedium" />
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="@color/cyber_text_secondary" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            app:cardBackgroundColor="@color/cyber_surface_card"
             app:cardElevation="1dp"
-            app:cardCornerRadius="12dp">
+            app:cardCornerRadius="16dp"
+            app:strokeColor="@color/cyber_border"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -56,4 +83,5 @@
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
-</ScrollView>
+    </ScrollView>
+</FrameLayout>
