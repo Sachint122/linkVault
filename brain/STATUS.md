@@ -1,7 +1,7 @@
 # STATUS
 
-**Last updated:** 2026-11-18
-**Updated by:** AI session — AI Sidebar (D-20): full code + docs, 122/122 green; device test pending (owner connecting device)
+**Last updated:** 2026-11-19
+**Updated by:** AI session — Project Cleanup & Reorganization (unwanted md & old code removed, 122/122 green)
 
 ## Current phase
 

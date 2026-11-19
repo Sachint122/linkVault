@@ -2,6 +2,16 @@
 
 Format: date — change — impact. Newest first.
 
+## 2026-11-19 (Repository Cleanup: Unwanted MD files, Old code & Stray assets removed)
+
+Owner directive:
+- **Root Cleanup:** Deleted obsolete, redundant, and scratch markdown files from the repository root (`AI_ARCHITECTURE.md`, `AI_CONTEXT.md`, `AI_MODEL_SETUP.md`, `AI_PROCESSING_FLOW.md`, `AI_TESTING.md`, `IMPLEMENTATION_PLAN.md`, `TASK.md`, `TESTING_STRATEGY.md`, `LINKVAULT_MASTER_GOAL.md`).
+- **Documentation Centralization:** Canonical architecture, data schemas, and requirements moved into `brain/` (`brain/DATA_SCHEMA.md`, `brain/ARCHITECTURE.md`, `brain/REQUIREMENTS.md`). The repository root now cleanly holds only `README.md`.
+- **README Modernization:** Completely refreshed [README.md](file:///d:/devil_code/link_vault/README.md) to **v1.2.0** with direct APK download, feature showcases (AI writing assistant sidebar, dynamic highlight pill, glowing amber dot, unified cyber UI), embedded model setup instructions, and clean links.
+- **Old Code & Unused Drawables Removed:** Deleted unreferenced legacy drawables (`bg_chip_selected.xml`, `bg_chip_unselected.xml`, `bg_cyber_card.xml`, `bg_search_bar_cyber.xml`), stray UI dump `lv_ui.xml`, and temporary `backup_source/` zip.
+- **Verification:** 122/122 unit tests green (`assembleDebug testDebugUnitTest` EXIT=0). Zero regressions.
+
+
 ## 2026-11-19 (Unified UI/UX Redesign: Home Screen & AI Writing Assistant Sidebar)
 
 Owner directive:

@@ -11,30 +11,27 @@ task requires.
    - `brain/DECISIONS.md` — approved/proposed technical decisions (ADRs).
    - `brain/CHANGELOG.md` — what changed recently and why.
 2. If the task needs requirements/schema/architecture detail, open only the
-   one relevant root doc from the map below.
+   one relevant doc from the map below.
 3. If the task needs code detail, read only the specific source files
    involved. Never glob-read the whole codebase.
 4. After any meaningful change, update `brain/STATUS.md` and
    `brain/CHANGELOG.md`, and add/amend an entry in `brain/DECISIONS.md` if a
    decision was made or changed.
 
-## File map
+## Documentation Map
 
 | File | Purpose | Read when |
 |---|---|---|
 | `brain/INDEX.md` | This protocol + doc map | Every session, first |
 | `brain/STATUS.md` | Current phase, done/next/blockers | Every session, second |
-| `brain/DECISIONS.md` | Decision log (proposed/approved/rejected) | Every session, third |
-| `brain/CHANGELOG.md` | Dated change history | Every session, fourth |
-| `README.md` | Project overview + doc index | Onboarding / summary needed |
-| `REQUIREMENTS.md` | Functional requirements + acceptance criteria | Requirement or scope questions |
-| `ARCHITECTURE.md` | Stack, layers, SAF/Share/backup strategies | Design or structural work |
-| `DATA_SCHEMA.md` | JSON schemas, storage layout, safe-write rules | Any storage/record work |
-| `IMPLEMENTATION_PLAN.md` | Phase plan, tasks, exit criteria, risks | Planning / status reporting |
-| `TESTING_STRATEGY.md` | Test layers, critical cases, tools | Writing or running tests |
-| `AI_CONTEXT.md` | AI working rules for this repo | Session start (thin pointer here) |
-| `brain/AI_SIDEBAR.md` | AI Sidebar architecture, restrictions, test checklist (D-20) | Sidebar/overlay/FGS work |
-| `LINKVAULT_MASTER_GOAL.md` | Authoritative product spec (read-only source of truth) | Only when a requirement is ambiguous |
+| `brain/DECISIONS.md` | Decision log (D-01 to D-20) | Every session, third |
+| `brain/CHANGELOG.md` | Chronological version & change history | Every session, fourth |
+| `README.md` | Public repository overview & quickstart | Onboarding / release summary |
+| `brain/DATA_SCHEMA.md` | JSON schemas (v1), storage layout, safe-write protocol | Storage, codecs, or record work |
+| `brain/ARCHITECTURE.md` | Stack, layers, SAF, backup, and component architecture | Architecture, service, or DI work |
+| `brain/REQUIREMENTS.md` | Functional requirements FR-01…FR-08 | Requirement or scope questions |
+| `brain/AI_SIDEBAR.md` | AI Writing Assistant Sidebar architecture & specs | Floating overlay, gesture, or LLM work |
+| `brain/TEST_GUIDE.md` | Manual test checklist & ADB command guide | Device testing & verification passes |
 
 ## Hard rules (from product spec, never violate)
 
@@ -42,3 +39,4 @@ task requires.
 - No backend, no accounts, no cloud, no SQLite/Realm/MongoDB/database.
 - Never move or delete the user's original files; imports are copy-only.
 - Never claim a feature is implemented unless code + tests support it.
+- Zero regression: All 122 unit tests must pass before declaring work complete.
